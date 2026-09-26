@@ -222,12 +222,12 @@
         .select-page.show { display:block; }
         .select-grid { display:flex; gap:16px; margin-top:20px; flex-wrap:wrap; }
         @media(max-width:500px){ .select-grid{ flex-direction:column; } }
-        .select-card { flex:1 1 calc(50% - 8px); box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:14px; padding:28px 16px; cursor:pointer; transition:all .22s; background:linear-gradient(180deg,#f8fafc,#fff); position:relative; overflow:hidden; }
+        .select-card { flex:1 1 calc(50% - 8px); box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:12px; padding:16px 10px; cursor:pointer; transition:all .22s; background:linear-gradient(180deg,#f8fafc,#fff); position:relative; overflow:hidden; }
         .select-card::after { content:''; position:absolute; top:0; left:-80%; width:60%; height:100%; background:linear-gradient(105deg,transparent,rgba(37,99,235,0.08),transparent); transform:skewX(-18deg); transition:left .5s; }
         .select-card:hover::after { left:130%; }
         .select-card:hover { border-color:#2563eb; background:#eff6ff; transform:translateY(-4px); box-shadow:0 14px 30px rgba(37,99,235,0.18), 0 0 0 3px rgba(37,99,235,0.08); }
-        .select-icon { font-size:48px; margin-bottom:12px; filter:drop-shadow(0 6px 12px rgba(37,99,235,0.18)); }
-        .select-title { font-weight:800; font-size:15px; color:#1e293b; letter-spacing:.3px; }
+        .select-icon { font-size:34px; margin-bottom:8px; filter:drop-shadow(0 6px 12px rgba(37,99,235,0.18)); }
+        .select-title { font-weight:800; font-size:14px; color:#1e293b; letter-spacing:.3px; }
         .select-desc { font-size:12px; color:#64748b; margin-top:6px; }
         .select-badge { display:inline-block; font-size:10px; font-weight:700; letter-spacing:1px; color:#0284c7; background:rgba(6,182,214,0.12); border:1px solid rgba(6,182,214,0.25); padding:3px 10px; border-radius:999px; margin-top:10px; }
         button { position:relative; overflow:hidden; }
@@ -236,6 +236,25 @@
         .group-card { overflow:hidden; }
         .group-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(to bottom,#06b6d4,#2563eb); opacity:.7; }
         .result-box { border-left-width:5px; box-shadow:0 6px 18px rgba(15,23,42,0.06); }
+        .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -4px; padding:0 4px; }
+        .table-scroll table { min-width:560px; }
+        /* 手機版 RWD */
+        @media(max-width:640px){
+            body { padding:10px; }
+            .container, .select-page, .admin-panel { padding:16px; border-radius:10px; }
+            .form-row { flex-wrap:wrap; }
+            .form-row .form-group { flex:1 1 100%; }
+            .add-row .form-group { flex:1 1 40%; }
+            .select-grid { flex-direction:column; }
+            .select-card { flex:1 1 100%; padding:20px 12px; }
+            .result-box { font-size:13px; }
+            .admin-tabs { flex-wrap:wrap; }
+            .admin-tab { flex:1 1 40%; font-size:12px; padding:8px; }
+            .tech-status { font-size:9px; letter-spacing:1px; gap:6px; }
+            .spec-table th, .spec-table td { padding:5px 6px; font-size:12px; }
+            .splash-title { font-size:24px !important; letter-spacing:2px !important; }
+            .splash-hud-top, .splash-hud-bottom { left:12px; right:12px; font-size:8px; }
+        }
     </style>
 </head>
 <body>
@@ -299,6 +318,21 @@
             <div class="select-desc">進出庫 · 扣帳入帳 · 庫存查詢</div>
             <div class="select-badge">● ONLINE</div>
         </div>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
+        <button style="background:#0ea5e9; flex:1; min-width:140px; margin:0;" onclick="exportAllDataAuth()">⭳ 匯出全部資料</button>
+        <span style="flex:1; min-width:140px; position:relative; display:block; margin:0; align-self:center;" onclick="importGate(event)">
+            <span id="importLabelText" style="display:block; text-align:center; width:100%; padding:12px; background:#8b5cf6; color:#fff; border:none; border-radius:6px; font-size:16px; font-weight:bold; box-sizing:border-box;">⭱ 匯入全部資料</span>
+            <input type="file" id="importFile" accept=".json,application/json" onchange="handleImportFile(event)" style="position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer;">
+        </span>
+    </div>
+    <div class="hint">跨裝置同步：電腦匯出存檔 → 到網站匯入選檔（規格＋庫存＋紀錄一次同步）</div>
+    <div style="margin-top:8px; text-align:center;">
+        <button onclick="document.getElementById('pasteBox').style.display=document.getElementById('pasteBox').style.display==='none'?'block':'none'" style="width:auto; padding:6px 12px; font-size:12px; margin:0; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">📋 選檔窗游標異常？改用貼上 JSON 匯入</button>
+    </div>
+    <div id="pasteBox" style="display:none; margin-top:8px;">
+        <div class="form-group"><label>貼上備份 JSON 全文（用記事本開啟備份檔→全選複製→貼上）</label><textarea id="pasteJson" rows="4" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box; font-size:12px; font-family:monospace;"></textarea></div>
+        <button style="background:#8b5cf6;" onclick="importPastedData()">⭱ 匯入貼上內容</button>
     </div>
 </div>
 
@@ -1117,6 +1151,68 @@ function loadRecord(){
         alert('已讀取存檔紀錄'+(t?' ('+t+')':''));
     }catch(e){ alert('讀取失敗：'+e.message); }
 }
+function exportAllDataAuth(){ pwdCallback=()=>exportAllData(); showPwd(); }
+function importAllDataAuth(){ pwdCallback=()=>{ document.getElementById('importFile').click(); window.addEventListener('focus', resetCursor, {once:true}); setTimeout(resetCursor, 1500); }; showPwd(); }
+function exportAllData(){
+    try{
+        const d=new Date();
+        const pad=n=>String(n).padStart(2,'0');
+        const fname=`SmartAI-backup-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+        const data={app:'智能AI包材運籌系統', exportedAt:d.toLocaleString('zh-TW',{hour12:false}), boxSpecs, palletSpecs, invItems, invLogs};
+        const blob=new Blob([JSON.stringify(data)], {type:'application/json;charset=utf-8'});
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);
+        a.download=fname;
+        a.click();
+        setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+    }catch(e){ alert('匯出失敗：'+e.message); }
+}
+let importAuthed=false;
+function importGate(ev){
+    if(importAuthed) return;
+    ev.preventDefault();
+    pwdCallback=()=>{
+        importAuthed=true;
+        document.getElementById('importLabelText').textContent='⭱ 驗證通過，請再按一次選檔';
+    };
+    showPwd();
+}
+function handleImportFile(ev){
+    document.getElementById('pwdOverlay').classList.remove('show');
+    resetCursor();
+    const f=ev.target.files && ev.target.files[0];
+    ev.target.value='';
+    if(!f){ resetCursor(); return; }
+    const reader=new FileReader();
+    reader.onload=()=>{
+        try{
+            applyImportedData(JSON.parse(reader.result));
+            resetCursor();
+        }catch(e){ alert('匯入失敗：'+e.message); resetCursor(); }
+    };
+    reader.readAsText(f, 'utf-8');
+}
+function applyImportedData(data){
+    if(!data || (!Array.isArray(data.boxSpecs) && !Array.isArray(data.palletSpecs) && !Array.isArray(data.invItems))) throw new Error('格式不符');
+    if(!confirm(`確定匯入備份${data.exportedAt?' ('+data.exportedAt+')':''}？將覆蓋現有全部資料（規格＋庫存＋紀錄）`)) return;
+    if(Array.isArray(data.boxSpecs)) boxSpecs=data.boxSpecs;
+    if(Array.isArray(data.palletSpecs)) palletSpecs=data.palletSpecs;
+    if(Array.isArray(data.invItems)) invItems=data.invItems;
+    if(Array.isArray(data.invLogs)) invLogs=data.invLogs;
+    saveBoxSpecs(); savePalletSpecs(); saveInv();
+    renderBoxSpecUI(); renderPalletSpecSelect(); renderAdminTables(); renderGroups();
+    renderInv(); renderInvOutSelect(); renderInvLog();
+    alert('匯入完成：紙箱'+boxSpecs.length+'筆、棧板'+palletSpecs.length+'筆、庫存'+invItems.length+'筆、紀錄'+invLogs.length+'筆');
+    resetCursor();
+}
+function importPastedData(){
+    const t=(document.getElementById('pasteJson').value||'').trim();
+    if(!t){ alert('請先貼上備份 JSON'); return; }
+    try{
+        applyImportedData(JSON.parse(t));
+        document.getElementById('pasteJson').value='';
+    }catch(e){ alert('匯入失敗：'+e.message); }
+}
 function resetToDefault(){
     if(!confirm('確定恢復為預設規格？會覆蓋現有自訂資料')) return;
     boxSpecs=[...DEFAULT_BOX_SPECS];
@@ -1148,6 +1244,7 @@ function confirmPwd(){
         document.getElementById('pwdOverlay').classList.remove('show');
         pwdCallback=null;
         if(cb) cb();
+        resetCursor();
     } else {
         alert('密碼錯誤');
         const inp=document.getElementById('pwdInput');
@@ -1167,6 +1264,14 @@ function switchAdminTab(which){
     document.getElementById('adminPalletSection').style.display = isBox ? 'none' : 'block';
     document.getElementById('tabBtnBox').classList.toggle('active', isBox);
     document.getElementById('tabBtnPallet').classList.toggle('active', !isBox);
+}
+function resetCursor(){
+    try{
+        document.body.style.cursor='default';
+        void document.body.offsetWidth;
+        document.body.style.cursor='';
+        if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    }catch(e){}
 }
 function toggleAdmin(show){
     const el=document.getElementById('adminOverlay');
@@ -1283,6 +1388,16 @@ groups.forEach(g=>{
     if(spec){ g.l=spec.l; g.w=spec.w; g.h=spec.h; }
 });
 renderGroups();
+
+// 表格手機版橫向捲動包裝
+document.querySelectorAll('.spec-table').forEach(t=>{
+    if(!t.parentElement.classList.contains('table-scroll')){
+        const w=document.createElement('div');
+        w.className='table-scroll';
+        t.parentElement.insertBefore(w, t);
+        w.appendChild(t);
+    }
+});
 
 // ====== 庫存管理 ======
 let invItems=[], invLogs=[];
