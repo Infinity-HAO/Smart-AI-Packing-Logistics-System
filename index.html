@@ -370,6 +370,7 @@
     </div>
     
     <datalist id="boxCodeList"></datalist>
+    <datalist id="staffList"></datalist>
     <select id="boxSpecSelect" style="display:none;"></select>
 
     <!-- 多組紙箱輸入 -->
@@ -451,16 +452,34 @@
         <button onclick="showSelect()" class="back-btn" style="width:auto; padding:6px 10px; font-size:12px; margin:0; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">← 返回選擇</button>
         <label class="tech-switch" title="深色 / 淺色切換"><input type="checkbox" class="theme-checkbox" onchange="toggleTheme()"><span class="track"><span class="sun">☀</span><span class="moon">☾</span><span class="knob"></span></span></label>
     </div>
-    <div style="text-align:center;">
-        <div style="font-size:44px; line-height:1;">📋</div>
-        <h2 style="color:#1e293b; margin:6px 0 4px; text-align:center;">智能庫存管理</h2>
-        <div class="hint" style="text-align:center;">紙箱物料進出 · 扣帳入帳 · 庫存查詢預警</div>
+    <div class="header" style="position:relative; justify-content:center;">
+        <div style="text-align:center;">
+            <div style="font-size:44px; line-height:1;">📋</div>
+            <h2 style="color:#1e293b; margin:6px 0 4px; text-align:center;">智能庫存管理</h2>
+            <div class="hint" style="text-align:center;">紙箱物料進出 · 扣帳入帳 · 庫存查詢預警</div>
+        </div>
+        <button class="admin-btn" onclick="openInvAdmin()" style="position:absolute; right:0; top:50%; transform:translateY(-50%);">⚙️ 後台管理</button>
     </div>
+    <div id="invEntryGrid" class="select-grid" style="margin-top:14px;">
+        <div class="select-card" onclick="enterInvQuick()">
+            <div class="select-icon">⚡</div>
+            <div class="select-title">簡易扣帳</div>
+            <div class="select-desc">刷條碼 / 輸料號品名即扣 · 連續作業</div>
+            <div class="select-badge">● FAST</div>
+        </div>
+        <div class="select-card" onclick="enterInvFull()">
+            <div class="select-icon">📋</div>
+            <div class="select-title">完整庫存管理</div>
+            <div class="select-desc">查詢 · 入庫 · 出庫 · 盤點 · 分析</div>
+            <div class="select-badge">● ONLINE</div>
+        </div>
+    </div>
+    <div id="invFullWrap" style="display:none;">
+    <button onclick="showInvEntry()" class="back-btn" style="width:auto; padding:6px 10px; font-size:12px; margin:0 0 12px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">← 返回庫存選單</button>
     <div class="admin-tabs" style="margin-top:14px;">
         <button id="invTabBtnQuery" class="admin-tab active" onclick="switchInvTab('query')">📊 庫存查詢</button>
         <button id="invTabBtnIn" class="admin-tab" onclick="switchInvTab('in')">📥 物料入庫</button>
         <button id="invTabBtnOut" class="admin-tab" onclick="switchInvTab('out')">📤 物料出庫</button>
-        <button id="invTabBtnAdjust" class="admin-tab" onclick="switchInvTab('adjust')">📝 盤點調整</button>
         <button id="invTabBtnAnalysis" class="admin-tab" onclick="switchInvTab('analysis')">📈 分析補貨</button>
         <button id="invTabBtnLog" class="admin-tab" onclick="switchInvTab('log')">📒 進出紀錄</button>
     </div>
@@ -472,9 +491,10 @@
         </div>
         <div id="invSummary" class="hint" style="margin-bottom:8px;"></div>
         <table class="spec-table" id="invTable">
-            <thead><tr><th>料號</th><th>品名</th><th>規格</th><th>儲位</th><th>庫存</th><th>安全庫存</th><th>狀態</th><th>更新時間</th><th>操作</th></tr></thead>
+            <thead><tr><th>料號</th><th>品名</th><th>規格</th><th>儲位</th><th>庫存</th><th>安全庫存</th><th>狀態</th><th>更新時間</th></tr></thead>
             <tbody></tbody>
         </table>
+        <div class="hint">品項修改 / 刪除 / 調撥請至後台管理操作</div>
     </div>
     <div id="invInPanel" style="display:none;">
         <div class="form-row">
@@ -491,6 +511,7 @@
         <div class="form-row">
             <div class="form-group"><label>單價(元，選填)</label><input type="number" id="invInPrice" placeholder="" min="0"></div>
             <div class="form-group"><label>供應商(選填)</label><input type="text" id="invInSupplier" placeholder=""></div>
+            <div class="form-group"><label>👤 領料人員（必填，未填不可入庫）</label><input type="text" id="invInWho" list="staffList" placeholder=""></div>
         </div>
         <div class="form-group"><label>單據 / 備註</label><input type="text" id="invInRemark" placeholder=""></div>
         <button class="btn-add" style="width:100%;" onclick="invIn()">✔ 確認入庫</button>
@@ -501,18 +522,12 @@
             <div class="form-group"><label>類型</label><select id="invOutType"><option value="出庫">📤 出庫</option><option value="扣帳">🧾 扣帳(出貨扣)</option></select></div>
             <div class="form-group"><label>數量</label><input type="number" id="invOutQty" placeholder="" min="1"></div>
         </div>
-        <div class="form-group"><label>用途 / 備註</label><input type="text" id="invOutRemark" placeholder=""></div>
+        <div class="form-row">
+            <div class="form-group"><label>👤 領料人員（必填，未填不可出庫）</label><input type="text" id="invOutWho" list="staffList" placeholder=""></div>
+            <div class="form-group"><label>用途 / 備註</label><input type="text" id="invOutRemark" placeholder=""></div>
+        </div>
         <button class="btn-add" style="width:100%; background:#f59e0b;" onclick="invOut()">✔ 確認出庫 / 扣帳</button>
         <div class="hint">庫存不足時禁止出庫，避免負庫存</div>
-    </div>
-    <div id="invAdjustPanel" style="display:none;">
-        <div class="form-row">
-            <div class="form-group"><label>料號</label><select id="invAdjCode"></select></div>
-            <div class="form-group"><label>實盤數量</label><input type="number" id="invAdjQty" placeholder="" min="0"></div>
-        </div>
-        <div class="form-group"><label>盤點備註</label><input type="text" id="invAdjRemark" placeholder=""></div>
-        <button class="btn-add" style="width:100%; background:#8b5cf6;" onclick="invAdjust()">✔ 確認盤點調整</button>
-        <div class="hint">以實盤數為準，差異自動產生盤盈 / 盤虧調整單</div>
     </div>
     <div id="invAnalysisPanel" style="display:none;">
         <div id="invDashCards" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;"></div>
@@ -532,13 +547,31 @@
     </div>
     <div id="invLogPanel" style="display:none;">
         <div class="form-row">
-            <div class="form-group" style="flex:1.4;"><input type="text" id="invLogSearch" placeholder="搜尋單號 / 料號 / 備註" oninput="renderInvLog()"></div>
+            <div class="form-group" style="flex:1.4;"><input type="text" id="invLogSearch" placeholder="搜尋單號 / 料號 / 領料人員 / 備註" oninput="renderInvLog()"></div>
             <div class="form-group" style="flex:0.6;"><button type="button" class="btn-add" style="margin:0; width:100%; background:#0ea5e9;" onclick="exportLogCSV()">⭳ 匯出CSV</button></div>
             <div class="form-group" style="flex:0.5;"><button type="button" class="mini-btn btn-del" style="margin:0; width:100%; padding:10px;" onclick="clearInvLog()">清空紀錄</button></div>
         </div>
         <div id="invLogSummary" class="hint" style="margin-bottom:8px;"></div>
         <table class="spec-table" id="invLogTable">
-            <thead><tr><th>單號</th><th>時間</th><th>類型</th><th>料號</th><th>數量</th><th>結餘</th><th>備註</th></tr></thead>
+            <thead><tr><th>單號</th><th>時間</th><th>類型</th><th>料號</th><th>領料人員</th><th>數量</th><th>結餘</th><th>備註</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    </div>
+    <div id="invQuickWrap" style="display:none;">
+        <button onclick="showInvEntry()" class="back-btn" style="width:auto; padding:6px 10px; font-size:12px; margin:0 0 12px; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">← 返回庫存選單</button>
+        <div id="invQuickSummary" class="hint" style="margin-bottom:10px;"></div>
+        <div class="form-group"><label>📷 刷條碼 / 輸入料號或品名（Enter 直接扣帳）</label><input type="text" id="invQuickCode" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter') invQuickDeduct()"></div>
+        <div class="form-row">
+            <div class="form-group"><label>👤 領料人員（必填，未填不可扣帳）</label><input type="text" id="invQuickWho" list="staffList" placeholder="" autocomplete="off" onkeydown="if(event.key==='Enter') invQuickDeduct()"></div>
+            <div class="form-group"><label>數量</label><input type="number" id="invQuickQty" value="" min="1"></div>
+            <div class="form-group"><label>出貨單號 / 備註</label><input type="text" id="invQuickRemark" placeholder=""></div>
+        </div>
+        <button class="btn-add" style="width:100%; background:#dc2626; font-size:18px; padding:14px;" onclick="invQuickDeduct()">⚡ 確認扣帳</button>
+        <div id="invQuickResult" style="margin-top:12px;"></div>
+        <label style="font-weight:bold; font-size:13px; margin:14px 0 6px; display:block;">🧾 今日扣帳明細</label>
+        <table class="spec-table" id="invQuickTable">
+            <thead><tr><th>時間</th><th>料號</th><th>品名</th><th>領料人員</th><th>數量</th><th>結餘</th></tr></thead>
             <tbody></tbody>
         </table>
     </div>
@@ -555,12 +588,15 @@
         <button id="tabBtnBox" class="admin-tab active" onclick="switchAdminTab('box')">📦 紙箱規格管理</button>
         <button id="tabBtnPallet" class="admin-tab" onclick="switchAdminTab('pallet')">🪵 棧板規格管理</button>
     </div>
+    <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+        <button class="btn-clear" style="background:#ef4444; flex:1; min-width:120px;" onclick="clearAllBackend()">🗑清空所有資料</button>
+        <button class="btn-save" style="background:#10b981; flex:1; min-width:100px;" onclick="saveRecord()">💾 存檔紀錄</button>
+        <button class="btn-load" style="background:#f59e0b; flex:1; min-width:100px;" onclick="loadRecord()">📂 讀取紀錄</button>
+        <button class="btn-reset" style="background:#64748b; flex:1; min-width:100px;" onclick="resetToDefault()">↺ 恢復為預設</button>
+        <button class="btn-done" style="background:#0ea5e9; flex:1; min-width:120px;" onclick="toggleAdmin(false)">完成並返回前台</button>
+    </div>
     <div class="section" id="adminBoxSection">
         <h3>📦 紙箱規格管理</h3>
-        <table class="spec-table" id="boxSpecTable">
-            <thead><tr><th class="sortable" onclick="sortBoxBy('code')">料號 <span id="sort-code"></span></th><th class="sortable" onclick="sortBoxBy('name')">品名 <span id="sort-name"></span></th><th class="sortable" onclick="sortBoxBy('size')">規格 <span id="sort-size"></span></th><th class="sortable" onclick="sortBoxBy('l')">長 <span id="sort-l"></span></th><th class="sortable" onclick="sortBoxBy('w')">寬 <span id="sort-w"></span></th><th class="sortable" onclick="sortBoxBy('h')">高 <span id="sort-h"></span></th><th class="sortable" onclick="sortBoxBy('createdAt')">建立時間 <span id="sort-createdAt"></span></th><th>操作</th></tr></thead>
-            <tbody></tbody>
-        </table>
         <div class="add-row">
             <div class="form-group"><label>料號</label><input type="text" id="newBoxCode" placeholder=""></div>
             <div class="form-group"><label>品名</label><input type="text" id="newBoxName" placeholder=""></div>
@@ -570,14 +606,14 @@
             <div class="form-group"><label>高</label><input type="number" id="newBoxH" placeholder=""></div>
             <button class="btn-add" onclick="addBoxSpec()">＋ 新增紙箱</button>
         </div>
-        <div class="hint">建議料號如 14A / 15A，尺寸單位 cm，新增後前台自動可用</div>
+        <div class="hint" style="margin-bottom:8px;">建議料號如 14A / 15A，尺寸單位 cm，新增後前台自動可用</div>
+        <table class="spec-table" id="boxSpecTable">
+            <thead><tr><th class="sortable" onclick="sortBoxBy('code')">料號 <span id="sort-code"></span></th><th class="sortable" onclick="sortBoxBy('name')">品名 <span id="sort-name"></span></th><th class="sortable" onclick="sortBoxBy('size')">規格 <span id="sort-size"></span></th><th class="sortable" onclick="sortBoxBy('l')">長 <span id="sort-l"></span></th><th class="sortable" onclick="sortBoxBy('w')">寬 <span id="sort-w"></span></th><th class="sortable" onclick="sortBoxBy('h')">高 <span id="sort-h"></span></th><th class="sortable" onclick="sortBoxBy('createdAt')">建立時間 <span id="sort-createdAt"></span></th><th>操作</th></tr></thead>
+            <tbody></tbody>
+        </table>
     </div>
     <div class="section" id="adminPalletSection" style="display:none;">
         <h3>🪵 棧板規格管理</h3>
-        <table class="spec-table" id="palletSpecTable">
-            <thead><tr><th class="sortable" onclick="sortPalletBy('code')">料號 <span id="sort-p-code"></span></th><th class="sortable" onclick="sortPalletBy('name')">品名 <span id="sort-p-name"></span></th><th class="sortable" onclick="sortPalletBy('size')">規格 <span id="sort-p-size"></span></th><th class="sortable" onclick="sortPalletBy('l')">長 <span id="sort-p-l"></span></th><th class="sortable" onclick="sortPalletBy('w')">寬 <span id="sort-p-w"></span></th><th class="sortable" onclick="sortPalletBy('h')">高 <span id="sort-p-h"></span></th><th class="sortable" onclick="sortPalletBy('material')">材質 <span id="sort-p-material"></span></th><th class="sortable" onclick="sortPalletBy('createdAt')">建立時間 <span id="sort-p-createdAt"></span></th><th>操作</th></tr></thead>
-            <tbody></tbody>
-        </table>
         <div class="add-row">
             <div class="form-group"><label>料號</label><input type="text" id="newPalletCode" placeholder=""></div>
             <div class="form-group"><label>品名</label><input type="text" id="newPalletName" placeholder=""></div>
@@ -588,14 +624,66 @@
             <div class="form-group"><label>材質</label><input type="text" id="newPalletMaterial" placeholder="" value=""></div>
             <button class="btn-add" onclick="addPalletSpec()">＋ 新增棧板</button>
         </div>
-        <div class="hint">高即棧板自身高度，預設 15cm。名稱留空會自動產生如 110*110*15</div>
+        <div class="hint" style="margin-bottom:8px;">高即棧板自身高度，預設 15cm。名稱留空會自動產生如 110*110*15</div>
+        <table class="spec-table" id="palletSpecTable">
+            <thead><tr><th class="sortable" onclick="sortPalletBy('code')">料號 <span id="sort-p-code"></span></th><th class="sortable" onclick="sortPalletBy('name')">品名 <span id="sort-p-name"></span></th><th class="sortable" onclick="sortPalletBy('size')">規格 <span id="sort-p-size"></span></th><th class="sortable" onclick="sortPalletBy('l')">長 <span id="sort-p-l"></span></th><th class="sortable" onclick="sortPalletBy('w')">寬 <span id="sort-p-w"></span></th><th class="sortable" onclick="sortPalletBy('h')">高 <span id="sort-p-h"></span></th><th class="sortable" onclick="sortPalletBy('material')">材質 <span id="sort-p-material"></span></th><th class="sortable" onclick="sortPalletBy('createdAt')">建立時間 <span id="sort-p-createdAt"></span></th><th>操作</th></tr></thead>
+            <tbody></tbody>
+        </table>
     </div>
-    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
-        <button class="btn-clear" style="background:#ef4444; flex:1; min-width:120px;" onclick="clearAllBackend()">🗑清空所有資料</button>
-        <button class="btn-save" style="background:#10b981; flex:1; min-width:100px;" onclick="saveRecord()">💾 存檔紀錄</button>
-        <button class="btn-load" style="background:#f59e0b; flex:1; min-width:100px;" onclick="loadRecord()">📂 讀取紀錄</button>
-        <button class="btn-reset" style="background:#64748b; flex:1; min-width:100px;" onclick="resetToDefault()">↺ 恢復為預設</button>
-        <button class="btn-done" style="background:#0ea5e9; flex:1; min-width:120px;" onclick="toggleAdmin(false)">完成並返回前台</button>
+</div>
+</div>
+
+<!-- 庫存後台 Overlay -->
+<div id="invAdminOverlay" class="admin-overlay">
+<div class="admin-panel">
+    <div class="admin-top">
+        <h2 style="margin:0; font-size:18px;">⚙️ 庫存後台管理 - 單據修正</h2>
+        <button class="close-btn" onclick="toggleInvAdmin(false)">✕ 關閉</button>
+    </div>
+    <div class="admin-tabs">
+        <button id="invAdminTabBtnLog" class="admin-tab active" onclick="switchInvAdminTab('log')">📒 單據修正</button>
+        <button id="invAdminTabBtnItem" class="admin-tab" onclick="switchInvAdminTab('item')">📦 庫存管理</button>
+        <button id="invAdminTabBtnAdjust" class="admin-tab" onclick="switchInvAdminTab('adjust')">📝 盤點調整</button>
+        <button id="invAdminTabBtnStaff" class="admin-tab" onclick="switchInvAdminTab('staff')">👤 領料人員資料</button>
+    </div>
+    <div id="invAdminLogSection">
+    <div class="hint" style="margin-bottom:8px;">扣錯打錯可在此修改領料人員 / 備註 / 數量（料號類型鎖定，改單需刪除重建）；數量異動自動調庫存並重算該料號全部結餘</div>
+    <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+        <button class="btn-add" style="background:#0ea5e9;" onclick="recalcAllBalances()">🧮 重算全部結餘</button>
+        <button class="btn-done" style="background:#0ea5e9;" onclick="toggleInvAdmin(false)">完成並返回</button>
+    </div>
+    <table class="spec-table" id="invAdminTable">
+        <thead><tr><th>單號</th><th>時間</th><th>類型</th><th>料號</th><th>領料人員</th><th>數量</th><th>結餘</th><th>備註</th><th>操作</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    </div>
+    <div id="invAdminItemSection" style="display:none;">
+    <div class="hint" style="margin-bottom:8px;">品項的修改 / 刪除 / 儲位調撥（刪除品項保留歷史單據）</div>
+    <table class="spec-table" id="invItemTable">
+        <thead><tr><th>料號</th><th>品名</th><th>規格</th><th>儲位</th><th>庫存</th><th>安全庫存</th><th>操作</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    </div>
+    <div id="invAdminStaffSection" style="display:none;">
+    <div class="add-row">
+        <div class="form-group"><label>員工編號</label><input type="text" id="newStaffId" placeholder=""></div>
+        <div class="form-group"><label>姓名</label><input type="text" id="newStaffName" placeholder=""></div>
+        <button class="btn-add" onclick="addStaff()">＋ 新增人員</button>
+    </div>
+    <div class="hint" style="margin-bottom:8px;">建檔後，庫存領料人員欄可下拉選取（例：20130604 李家豪）</div>
+    <table class="spec-table" id="staffTable">
+        <thead><tr><th class="sortable" onclick="sortStaffBy('id')">員工編號 <span id="sort-s-id"></span></th><th class="sortable" onclick="sortStaffBy('name')">姓名 <span id="sort-s-name"></span></th><th class="sortable" onclick="sortStaffBy('createdAt')">建立時間 <span id="sort-s-createdAt"></span></th><th>操作</th></tr></thead>
+        <tbody></tbody>
+    </table>
+    </div>
+    <div id="invAdminAdjustSection" style="display:none;">
+    <div class="hint" style="margin-bottom:8px;">以實盤數為準，差異自動產生盤盈 / 盤虧調整單</div>
+    <div class="form-row">
+        <div class="form-group"><label>料號</label><select id="invAdjCode"></select></div>
+        <div class="form-group"><label>實盤數量</label><input type="number" id="invAdjQty" placeholder="" min="0"></div>
+    </div>
+    <div class="form-group"><label>盤點備註</label><input type="text" id="invAdjRemark" placeholder=""></div>
+    <button class="btn-add" style="width:100%; background:#8b5cf6;" onclick="invAdjust()">✔ 確認盤點調整</button>
     </div>
 </div>
 </div>
@@ -1214,7 +1302,7 @@ function exportAllData(){
         const d=new Date();
         const pad=n=>String(n).padStart(2,'0');
         const fname=`SmartAI-backup-${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}.json`;
-        const data={app:'智能AI包材運籌系統', exportedAt:d.toLocaleString('zh-TW',{hour12:false}), boxSpecs, palletSpecs, invItems, invLogs};
+        const data={app:'智能AI包材運籌系統', exportedAt:d.toLocaleString('zh-TW',{hour12:false}), boxSpecs, palletSpecs, invItems, invLogs, invStaff};
         const blob=new Blob([JSON.stringify(data)], {type:'application/json;charset=utf-8'});
         const a=document.createElement('a');
         a.href=URL.createObjectURL(blob);
@@ -1255,10 +1343,11 @@ function applyImportedData(data){
     if(Array.isArray(data.palletSpecs)) palletSpecs=data.palletSpecs;
     if(Array.isArray(data.invItems)) invItems=data.invItems;
     if(Array.isArray(data.invLogs)) invLogs=data.invLogs;
-    saveBoxSpecs(); savePalletSpecs(); saveInv();
-    renderBoxSpecUI(); renderPalletSpecSelect(); renderAdminTables(); renderGroups();
+    if(Array.isArray(data.invStaff)) invStaff=data.invStaff;
+    saveBoxSpecs(); savePalletSpecs(); saveInv(); saveStaff();
+    renderBoxSpecUI(); renderPalletSpecSelect(); renderAdminTables(); renderStaffTable(); renderGroups();
     renderInv(); renderInvOutSelect(); renderInvLog();
-    alert('匯入完成：紙箱'+boxSpecs.length+'筆、棧板'+palletSpecs.length+'筆、庫存'+invItems.length+'筆、紀錄'+invLogs.length+'筆');
+    alert('匯入完成：紙箱'+boxSpecs.length+'筆、棧板'+palletSpecs.length+'筆、庫存'+invItems.length+'筆、紀錄'+invLogs.length+'筆、人員'+invStaff.length+'筆');
     resetCursor();
 }
 function importPastedData(){
@@ -1354,6 +1443,7 @@ function showDevPage(id){
     document.getElementById('selectPage').classList.remove('show');
     hideAllPages();
     document.getElementById(id).style.display='block';
+    if(id==='valvePage') showInvEntry();
     window.scrollTo(0,0);
 }
 function showPallet(){
@@ -1376,8 +1466,8 @@ function hideSplash(){
         }
     }, 700);
 }
-setTimeout(hideSplash, 2100);
-window.addEventListener('load', ()=> setTimeout(hideSplash, 1700));
+setTimeout(hideSplash, 2700);
+window.addEventListener('load', ()=> setTimeout(hideSplash, 2300));
 function applyTheme(mode){
     const dark = mode==='dark';
     document.body.classList.toggle('dark-mode', dark);
@@ -1488,15 +1578,14 @@ function saveInv(){
     }catch(e){}
 }
 function switchInvTab(n){
-    const panels={query:'invQueryPanel',in:'invInPanel',out:'invOutPanel',adjust:'invAdjustPanel',analysis:'invAnalysisPanel',log:'invLogPanel'};
-    const btns={query:'invTabBtnQuery',in:'invTabBtnIn',out:'invTabBtnOut',adjust:'invTabBtnAdjust',analysis:'invTabBtnAnalysis',log:'invTabBtnLog'};
-    ['query','in','out','adjust','analysis','log'].forEach(k=>{
+    const panels={query:'invQueryPanel',in:'invInPanel',out:'invOutPanel',analysis:'invAnalysisPanel',log:'invLogPanel'};
+    const btns={query:'invTabBtnQuery',in:'invTabBtnIn',out:'invTabBtnOut',analysis:'invTabBtnAnalysis',log:'invTabBtnLog'};
+    ['query','in','out','analysis','log'].forEach(k=>{
         document.getElementById(panels[k]).style.display = (k===n)?'block':'none';
         document.getElementById(btns[k]).classList.toggle('active', k===n);
     });
     if(n==='query') renderInv();
     if(n==='out') renderInvOutSelect();
-    if(n==='adjust') renderInvAdjSelect();
     if(n==='analysis') renderAnalysis();
     if(n==='log') renderInvLog();
 }
@@ -1522,10 +1611,10 @@ function renderInv(){
         if(s.stock<=0) empty++;
         else if(s.stock<=(s.safe||0)) low++;
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td><b>${s.code}</b></td><td>${s.name||'—'}${s.supplier?`<br><small style="color:#64748b;">供：${s.supplier}</small>`:''}</td><td>${s.spec||'—'}</td><td>${s.loc||'—'}</td><td><b>${s.stock}</b> ${s.unit||''}</td><td>${s.safe||0}</td><td>${invStatus(s)}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(s.updated)}</td><td><button class="mini-btn btn-edit" onclick="editInvItem('${String(s.code).replace(/'/g,"\\'")}')">修改</button> <button class="mini-btn btn-del" onclick="deleteInvItem('${String(s.code).replace(/'/g,"\\'")}')">刪除</button> <button class="mini-btn" style="background:#8b5cf6;" onclick="invTransfer('${String(s.code).replace(/'/g,"\\'")}')">調撥</button></td>`;
+        tr.innerHTML=`<td><b>${s.code}</b></td><td>${s.name||'—'}${s.supplier?`<br><small style="color:#64748b;">供：${s.supplier}</small>`:''}</td><td>${s.spec||'—'}</td><td>${s.loc||'—'}</td><td><b>${s.stock}</b> ${s.unit||''}</td><td>${s.safe||0}</td><td>${invStatus(s)}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(s.updated)}</td>`;
         tb.appendChild(tr);
     });
-    if(list.length===0) tb.innerHTML='<tr><td colspan="9" style="color:#94a3b8;">尚無庫存資料，請入庫或從紙箱料號匯入</td></tr>';
+    if(list.length===0) tb.innerHTML='<tr><td colspan="8" style="color:#94a3b8;">尚無庫存資料，請入庫或從紙箱料號匯入</td></tr>';
     let totalVal=0;
     invItems.forEach(s=>{ totalVal += (s.stock||0)*(s.price||0); });
     const sum=document.getElementById('invSummary');
@@ -1566,7 +1655,10 @@ function fillInvSpec(){
 function invIn(){
     const code=(document.getElementById('invInCode').value||'').trim();
     const qty=parseFloat(document.getElementById('invInQty').value);
+    const who=(document.getElementById('invInWho').value||'').trim();
     if(!code){ alert('請輸入料號'); return; }
+    if(!who){ alert('請輸入領料人員，未填不可入庫'); document.getElementById('invInWho').focus(); return; }
+    if(!invStaff.some(s=>s.name.toLowerCase()===who.toLowerCase())){ alert('「'+who+'」非建檔領料人員，不可入庫'); return; }
     if(!qty||qty<=0){ alert('請輸入正確入庫數量'); return; }
     let it=invItems.find(s=>s.code.toLowerCase()===code.toLowerCase());
     const name=(document.getElementById('invInName').value||'').trim();
@@ -1595,7 +1687,7 @@ function invIn(){
     it.stock+=qty;
     it.updated=Date.now();
     const no=genDocNo('IN');
-    invLogs.unshift({no, t:Date.now(), type:'入庫', code:it.code, qty:'+'+qty, balance:it.stock, remark});
+    invLogs.unshift({no, t:Date.now(), type:'入庫', code:it.code, who, qty:'+'+qty, balance:it.stock, remark});
     saveInv(); renderInv();
     document.getElementById('invInCode').value='';
     document.getElementById('invInName').value='';
@@ -1605,13 +1697,16 @@ function invIn(){
     document.getElementById('invInPrice').value='';
     document.getElementById('invInSupplier').value='';
     document.getElementById('invInRemark').value='';
-    alert(`入庫成功 ${no}：${it.code} +${qty}，結餘 ${it.stock}`);
+    alert(`入庫成功 ${no}：${it.code} +${qty}，領料人員 ${who}，結餘 ${it.stock}`);
 }
 function invOut(){
     const code=document.getElementById('invOutCode').value;
     const type=document.getElementById('invOutType').value;
     const qty=parseFloat(document.getElementById('invOutQty').value);
     if(!code){ alert('無可出庫品項，請先入庫'); return; }
+    const who=(document.getElementById('invOutWho').value||'').trim();
+    if(!who){ alert('請輸入領料人員，未填不可出庫'); document.getElementById('invOutWho').focus(); return; }
+    if(!invStaff.some(s=>s.name.toLowerCase()===who.toLowerCase())){ alert('「'+who+'」非建檔領料人員，不可出庫'); return; }
     if(!qty||qty<=0){ alert('請輸入正確數量'); return; }
     const it=invItems.find(s=>s.code===code);
     if(!it){ alert('找不到該料號'); return; }
@@ -1620,11 +1715,11 @@ function invOut(){
     it.stock-=qty;
     it.updated=Date.now();
     const no=genDocNo('OUT');
-    invLogs.unshift({no, t:Date.now(), type, code:it.code, qty:'-'+qty, balance:it.stock, remark});
+    invLogs.unshift({no, t:Date.now(), type, code:it.code, who, qty:'-'+qty, balance:it.stock, remark});
     saveInv(); renderInv(); renderInvOutSelect();
     document.getElementById('invOutQty').value='';
     document.getElementById('invOutRemark').value='';
-    alert(`${type}成功 ${no}：${it.code} -${qty}，結餘 ${it.stock}`);
+    alert(`${type}成功 ${no}：${it.code} -${qty}，領料人員 ${who}，結餘 ${it.stock}`);
 }
 function editInvItem(code){
     if(!requireInvAuth(()=>editInvItem(code))) return;
@@ -1705,13 +1800,13 @@ function editInvItem(code){
         const type=diff>0?'盤盈':'盤虧';
         invLogs.unshift({no:genDocNo('ADJ'), t:Date.now(), type, code:newCode, qty:(diff>0?'+':'')+diff, balance:stock, remark:'手動修改庫存'});
     }
-    saveInv(); renderInv();
+    saveInv(); renderInv(); renderInvItemsAdmin();
 }
 function deleteInvItem(code){
     if(!requireInvAuth(()=>deleteInvItem(code))) return;
     if(!confirm('確定刪除庫存品項 '+code+' ？（紀錄保留）')) return;
     invItems=invItems.filter(s=>s.code!==code);
-    saveInv(); renderInv();
+    saveInv(); renderInv(); renderInvItemsAdmin();
 }
 function invTransfer(code){
     if(!requireInvAuth(()=>invTransfer(code))) return;
@@ -1726,7 +1821,7 @@ function invTransfer(code){
     it.loc=loc;
     it.updated=Date.now();
     invLogs.unshift({no:genDocNo('TR'), t:Date.now(), type:'調撥', code:it.code, qty:'—', balance:it.stock, remark:`${old} → ${loc}`});
-    saveInv(); renderInv();
+    saveInv(); renderInv(); renderInvItemsAdmin();
     alert(`調撥成功 ${it.code}：${old} → ${loc}`);
 }
 function invLastMove(it){
@@ -1836,8 +1931,8 @@ function exportInvCSV(){
 }
 function exportLogCSV(){
     if(invLogs.length===0){ alert('無進出紀錄可匯出'); return; }
-    const rows=[['單號','時間','類型','料號','數量','結餘','備註']];
-    invLogs.forEach(l=>rows.push([l.no||'', formatCreatedAt(l.t), l.type, l.code, l.qty, l.balance, l.remark||'']));
+    const rows=[['單號','時間','類型','料號','領料人員','數量','結餘','備註']];
+    invLogs.forEach(l=>rows.push([l.no||'', formatCreatedAt(l.t), l.type, l.code, l.who||'', l.qty, l.balance, l.remark||'']));
     csvDownload('進出紀錄.csv', rows);
 }
 function renderInvLog(){
@@ -1845,18 +1940,274 @@ function renderInvLog(){
     if(!tb) return;
     const kw=(document.getElementById('invLogSearch')?.value||'').trim().toLowerCase();
     tb.innerHTML='';
-    const list=invLogs.filter(l=> !kw || String(l.no||'').toLowerCase().includes(kw) || String(l.code).toLowerCase().includes(kw) || String(l.remark||'').toLowerCase().includes(kw));
+    const list=invLogs.filter(l=> !kw || String(l.no||'').toLowerCase().includes(kw) || String(l.code).toLowerCase().includes(kw) || String(l.who||'').toLowerCase().includes(kw) || String(l.remark||'').toLowerCase().includes(kw));
     list.forEach(l=>{
         const tr=document.createElement('tr');
         const color=(l.type==='入庫'||l.type==='盤盈')?'#059669':(l.type==='調撥'?'#0284c7':'#dc2626');
-        tr.innerHTML=`<td style="font-size:11px; white-space:nowrap;">${l.no||'—'}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(l.t)}</td><td style="color:${color}; font-weight:bold;">${l.type}</td><td><b>${l.code}</b></td><td><b>${l.qty}</b></td><td>${l.balance}</td><td>${l.remark||'—'}</td>`;
+        tr.innerHTML=`<td style="font-size:11px; white-space:nowrap;">${l.no||'—'}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(l.t)}</td><td style="color:${color}; font-weight:bold;">${l.type}</td><td><b>${l.code}</b></td><td><b>${l.who||'—'}</b></td><td><b>${l.qty}</b></td><td>${l.balance}</td><td>${l.remark||'—'}</td>`;
         tb.appendChild(tr);
     });
-    if(list.length===0) tb.innerHTML='<tr><td colspan="7" style="color:#94a3b8;">尚無進出紀錄</td></tr>';
+    if(list.length===0) tb.innerHTML='<tr><td colspan="8" style="color:#94a3b8;">尚無進出紀錄</td></tr>';
     let inN=0, outN=0;
     invLogs.forEach(l=>{ const v=parseFloat(l.qty); if(v>0) inN+=v; else outN+=-v; });
     const sum=document.getElementById('invLogSummary');
     if(sum) sum.textContent=`累计入庫 ${inN} ／ 累计出庫扣帳 ${outN} ／ 共 ${invLogs.length} 筆`;
+}
+function openInvAdmin(){
+    if(!requireInvAuth(openInvAdmin)) return;
+    toggleInvAdmin(true);
+}
+
+function toggleInvAdmin(show){
+    const el=document.getElementById('invAdminOverlay');
+    if(show){ switchInvAdminTab('log'); renderInvAdmin(); renderInvItemsAdmin(); renderStaffTable(); el.classList.add('show'); }
+    else { el.classList.remove('show'); invAuthed=false; }
+}
+function switchInvAdminTab(which){
+    ['log','item','adjust','staff'].forEach(k=>{
+        document.getElementById('invAdmin'+k.charAt(0).toUpperCase()+k.slice(1)+'Section').style.display = (k===which)?'block':'none';
+    });
+    document.getElementById('invAdminTabBtnLog').classList.toggle('active', which==='log');
+    document.getElementById('invAdminTabBtnItem').classList.toggle('active', which==='item');
+    document.getElementById('invAdminTabBtnAdjust').classList.toggle('active', which==='adjust');
+    document.getElementById('invAdminTabBtnStaff').classList.toggle('active', which==='staff');
+    if(which==='staff') renderStaffTable();
+    if(which==='item') renderInvItemsAdmin();
+    if(which==='adjust') renderInvAdjSelect();
+}
+function renderInvItemsAdmin(){
+    const tb=document.querySelector('#invItemTable tbody');
+    if(!tb) return;
+    tb.innerHTML='';
+    invItems.forEach(s=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td><b>${s.code}</b></td><td>${s.name||'—'}</td><td>${s.spec||'—'}</td><td>${s.loc||'—'}</td><td><b>${s.stock}</b> ${s.unit||''}</td><td><b>${s.safe||0}</b></td><td><button class="mini-btn btn-edit" onclick="editInvItem('${String(s.code).replace(/'/g,"\\'")}')">修改</button> <button class="mini-btn btn-del" onclick="deleteInvItem('${String(s.code).replace(/'/g,"\\'")}')">刪除</button> <button class="mini-btn" style="background:#8b5cf6;" onclick="invTransfer('${String(s.code).replace(/'/g,"\\'")}')">調撥</button></td>`;
+        tb.appendChild(tr);
+    });
+    if(invItems.length===0) tb.innerHTML='<tr><td colspan="7" style="color:#94a3b8;">尚無品項</td></tr>';
+}
+function invLogDelta(l){
+    if(l.type==='調撥') return 0;
+    const v=parseFloat(l.qty);
+    return isNaN(v)?0:v;
+}
+function recalcItem(code){
+    const it=invItems.find(s=>s.code===code);
+    if(!it) return;
+    const logs=invLogs.filter(l=>l.code===code).sort((a,b)=>a.t-b.t);
+    let total=0;
+    logs.forEach(l=>{ total+=invLogDelta(l); });
+    let bal=Math.round((it.stock-total)*100)/100;
+    logs.forEach(l=>{
+        if(l.type==='調撥') return;
+        bal=Math.round((bal+invLogDelta(l))*100)/100;
+        l.balance=bal;
+    });
+}
+function recalcAllBalances(){
+    invItems.forEach(s=>recalcItem(s.code));
+    saveInv(); renderInvAdmin(); renderInv(); renderInvLog(); renderInvQuick();
+    alert('已重算全部品項結餘');
+}
+function renderInvAdmin(){
+    const tb=document.querySelector('#invAdminTable tbody');
+    if(!tb) return;
+    tb.innerHTML='';
+    invLogs.forEach((l,idx)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td style="font-size:11px; white-space:nowrap;">${l.no||'—'}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(l.t)}</td><td><b>${l.type}</b></td><td><b>${l.code}</b></td><td>${l.who||'—'}</td><td><b>${l.qty}</b></td><td>${l.balance}</td><td>${l.remark||'—'}</td><td><button class="mini-btn btn-edit" onclick="editInvLog(${idx})">修改</button> <button class="mini-btn btn-del" onclick="deleteInvLog(${idx})">刪除</button></td>`;
+        tb.appendChild(tr);
+    });
+    if(invLogs.length===0) tb.innerHTML='<tr><td colspan="9" style="color:#94a3b8;">尚無單據</td></tr>';
+}
+function propagateForward(code, fromLog, startBal){
+    const logs=invLogs.filter(x=>x.code===code).sort((a,b)=>a.t-b.t);
+    const i=logs.indexOf(fromLog);
+    if(i<0) return;
+    let bal=startBal;
+    for(let j=i+1;j<logs.length;j++){
+        if(logs[j].type==='調撥') continue;
+        bal=Math.round((bal+invLogDelta(logs[j]))*100)/100;
+        logs[j].balance=bal;
+    }
+}
+function editInvLog(idx){
+    const l=invLogs[idx];
+    if(!l) return;
+    const oldCode=l.code, oldDelta=invLogDelta(l);
+    const codeInp=prompt('修改 料號', l.code);
+    if(codeInp===null) return;
+    const newCode=codeInp.trim();
+    if(!newCode){ alert('料號不可空白'); return; }
+    const newIt=invItems.find(s=>s.code.toLowerCase()===newCode.toLowerCase());
+    if(!newIt){ alert('找不到料號「'+newCode+'」，請先建檔'); return; }
+    const who=prompt('修改 領料人員', l.who||'');
+    if(who===null) return;
+    let newDelta=oldDelta, newQtyStr=l.qty;
+    if(l.type!=='調撥'){
+        const positive=(l.type==='入庫'||l.type==='盤盈');
+        const curAbs=Math.abs(parseFloat(l.qty))||0;
+        const inp=prompt(`修改 數量（${positive?'入庫為正':'出庫為正'}）`, curAbs);
+        if(inp===null) return;
+        const v=parseFloat(inp);
+        if(isNaN(v)||v<=0){ alert('數量輸入錯誤'); return; }
+        newDelta=positive?v:-v;
+        newQtyStr=(positive?'+':'-')+v;
+    }
+    const balInp=prompt('修改 結餘（空白=自動重算）', l.balance);
+    if(balInp===null) return;
+    const manualBal=balInp.trim()==='' ? null : parseFloat(balInp);
+    if(manualBal!==null && (isNaN(manualBal)||manualBal<0)){ alert('結餘輸入錯誤'); return; }
+    const remark=prompt('修改 備註', l.remark||'');
+    if(remark===null) return;
+    // 1+2) 同料號走淨額，不同料號先回沖舊、再套用新
+    const oldIt=invItems.find(s=>s.code===oldCode);
+    const sameItem=oldIt && oldIt.code.toLowerCase()===newIt.code.toLowerCase();
+    if(sameItem){
+        const net=Math.round((newIt.stock+(newDelta-oldDelta))*100)/100;
+        if(net<0){ alert(`修改後庫存將變負數（${net}），已阻擋`); return; }
+        newIt.stock=net;
+        newIt.updated=Date.now();
+    } else {
+        if(oldIt && oldDelta!==0){
+            const back=Math.round((oldIt.stock-oldDelta)*100)/100;
+            if(back<0){ alert(`舊料號 ${oldCode} 回沖後將變負數（${back}），已阻擋`); return; }
+            oldIt.stock=back;
+            oldIt.updated=Date.now();
+        }
+        if(newDelta!==0){
+            const fwd=Math.round((newIt.stock+newDelta)*100)/100;
+            if(fwd<0){ if(oldIt&&oldDelta!==0){oldIt.stock=Math.round((oldIt.stock+oldDelta)*100)/100;} alert(`新料號 ${newIt.code} 套用後將變負數（${fwd}），已阻擋並還原`); return; }
+            newIt.stock=fwd;
+            newIt.updated=Date.now();
+        }
+    }
+    l.code=newIt.code;
+    l.qty=newQtyStr;
+    l.who=who.trim();
+    l.remark=remark.trim();
+    // 3) 結餘：手動則定錨向前傳導，否則整條重算
+    if(oldIt) recalcItem(oldIt.code);
+    if(manualBal!==null){
+        l.balance=manualBal;
+        propagateForward(newIt.code, l, manualBal);
+    } else {
+        recalcItem(newIt.code);
+    }
+    saveInv(); renderInvAdmin(); renderInv(); renderInvLog(); renderInvQuick(); renderInvOutSelect(); renderInvAdjSelect();
+    alert('單據已更新，庫存與結餘已連動');
+}
+function deleteInvLog(idx){
+    const l=invLogs[idx];
+    if(!l) return;
+    if(!confirm(`確定刪除單據 ${l.no||''}（${l.type} ${l.code} ${l.qty}）？\n將回沖庫存並重算該料號結餘`)) return;
+    const it=invItems.find(s=>s.code===l.code);
+    const d=invLogDelta(l);
+    if(it && d!==0){
+        const newStock=Math.round((it.stock-d)*100)/100;
+        if(newStock<0){ alert(`刪除後庫存將變負數（${newStock}），已阻擋，請先調整`); return; }
+        it.stock=newStock;
+        it.updated=Date.now();
+    }
+    invLogs.splice(idx,1);
+    if(it) recalcItem(it.code);
+    saveInv(); renderInvAdmin(); renderInv(); renderInvLog(); renderInvQuick(); renderInvOutSelect(); renderInvAdjSelect();
+    alert('單據已刪除並回沖');
+}
+let invStaff=[];
+function loadStaff(){
+    try{
+        const a=localStorage.getItem('invStaff');
+        invStaff=a?JSON.parse(a):[];
+        if(!Array.isArray(invStaff)) invStaff=[];
+    }catch(e){ invStaff=[]; }
+}
+function saveStaff(){ try{ localStorage.setItem('invStaff', JSON.stringify(invStaff)); }catch(e){} }
+let staffSortKey='id', staffSortDir=1;
+function staffSortVal(s,key){
+    if(key==='id') return String(s.id);
+    if(key==='name') return String(s.name||'');
+    if(key==='createdAt') return Number(s.createdAt)||0;
+    return 0;
+}
+function applyStaffSort(){
+    const key=staffSortKey, dir=staffSortDir;
+    invStaff.sort((a,b)=>{
+        const va=staffSortVal(a,key), vb=staffSortVal(b,key);
+        let r;
+        if(key==='createdAt') r=(va>vb?1:va<vb?-1:0);
+        else r=String(va).localeCompare(String(vb), 'zh-Hant', {numeric:true});
+        return r*dir;
+    });
+}
+function sortStaffBy(key){
+    if(staffSortKey===key) staffSortDir*=-1;
+    else { staffSortKey=key; staffSortDir=1; }
+    applyStaffSort();
+    saveStaff();
+    renderStaffTable();
+}
+function updateStaffSortHeaders(){
+    ['id','name','createdAt'].forEach(k=>{
+        const el=document.getElementById('sort-s-'+k);
+        if(el) el.textContent = (staffSortKey===k) ? (staffSortDir===1 ? '▲' : '▼') : '';
+    });
+}
+function renderStaffTable(){
+    updateStaffSortHeaders();
+    const tb=document.querySelector('#staffTable tbody');
+    if(!tb) return;
+    tb.innerHTML='';
+    invStaff.forEach((s,idx)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td><b>${s.id}</b></td><td>${s.name}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(s.createdAt)}</td><td><button class="mini-btn btn-edit" onclick="editStaff(${idx})">修改</button> <button class="mini-btn btn-del" onclick="deleteStaff(${idx})">刪除</button></td>`;
+        tb.appendChild(tr);
+    });
+    if(invStaff.length===0) tb.innerHTML='<tr><td colspan="4" style="color:#94a3b8;">尚無人員，請新增（例：20130604 李家豪）</td></tr>';
+    renderStaffList();
+}
+function renderStaffList(){
+    const dl=document.getElementById('staffList');
+    if(!dl) return;
+    dl.innerHTML='';
+    invStaff.forEach(s=>{
+        const o=document.createElement('option');
+        o.value=s.name;
+        o.label=`${s.id} ${s.name}`;
+        dl.appendChild(o);
+    });
+}
+function addStaff(){
+    const id=document.getElementById('newStaffId').value.trim();
+    const name=document.getElementById('newStaffName').value.trim();
+    if(!id){ alert('請輸入員工編號'); return; }
+    if(!name){ alert('請輸入姓名'); return; }
+    if(invStaff.some(s=>s.id.toLowerCase()===id.toLowerCase())){ alert('員工編號已存在：'+id); return; }
+    invStaff.push({id,name,createdAt:Date.now()});
+    applyStaffSort();
+    saveStaff(); renderStaffTable();
+    document.getElementById('newStaffId').value='';
+    document.getElementById('newStaffName').value='';
+}
+function editStaff(idx){
+    const s=invStaff[idx];
+    if(!s) return;
+    const id=prompt('修改 員工編號', s.id);
+    if(id===null) return;
+    const nid=id.trim();
+    if(!nid){ alert('員工編號不可空白'); return; }
+    if(nid.toLowerCase()!==s.id.toLowerCase() && invStaff.some((o,i)=>i!==idx&&o.id.toLowerCase()===nid.toLowerCase())){ alert('員工編號已存在：'+nid); return; }
+    const name=prompt('修改 姓名', s.name);
+    if(name===null) return;
+    if(!name.trim()){ alert('姓名不可空白'); return; }
+    s.id=nid; s.name=name.trim();
+    applyStaffSort();
+    saveStaff(); renderStaffTable();
+}
+function deleteStaff(idx){
+    if(!confirm('確定刪除 '+invStaff[idx].id+' '+invStaff[idx].name+' ?（歷史單據保留原姓名）')) return;
+    invStaff.splice(idx,1);
+    saveStaff(); renderStaffTable();
 }
 function clearInvLog(){
     if(!confirm('確定清空全部進出紀錄？（庫存數量不變）')) return;
@@ -1864,9 +2215,88 @@ function clearInvLog(){
     saveInv(); renderInvLog();
 }
 loadInv();
+loadStaff();
 renderInv();
 renderInvOutSelect();
 renderInvLog();
+renderStaffList();
+function showInvEntry(){
+    document.getElementById('invEntryGrid').style.display='flex';
+    document.getElementById('invFullWrap').style.display='none';
+    document.getElementById('invQuickWrap').style.display='none';
+}
+function enterInvFull(){
+    document.getElementById('invEntryGrid').style.display='none';
+    document.getElementById('invQuickWrap').style.display='none';
+    document.getElementById('invFullWrap').style.display='block';
+    switchInvTab('query');
+}
+function enterInvQuick(){
+    document.getElementById('invEntryGrid').style.display='none';
+    document.getElementById('invFullWrap').style.display='none';
+    document.getElementById('invQuickWrap').style.display='block';
+    renderInvQuick();
+    setTimeout(()=>{ const el=document.getElementById('invQuickCode'); if(el) el.focus(); }, 80);
+}
+function findInvItem(key){
+    key=(key||'').trim();
+    if(!key) return {err:'請刷條碼或輸入料號 / 品名'};
+    const low=key.toLowerCase();
+    let it=invItems.find(s=>s.code.toLowerCase()===low);
+    if(it) return {it};
+    it=invItems.find(s=>(s.name||'').toLowerCase()===low);
+    if(it) return {it};
+    const cands=invItems.filter(s=>s.code.toLowerCase().includes(low)||(s.name||'').toLowerCase().includes(low));
+    if(cands.length===1) return {it:cands[0]};
+    if(cands.length>1) return {err:`「${key}」有多筆相符（${cands.map(s=>s.code).join('、')}），請輸入完整料號`};
+    return {err:`找不到料號 / 品名「${key}」，請檢查或先入庫建檔`};
+}
+function invQuickDeduct(){
+    const key=(document.getElementById('invQuickCode').value||'').trim();
+    const who=(document.getElementById('invQuickWho').value||'').trim();
+    const qty=parseFloat(document.getElementById('invQuickQty').value)||0;
+    const remark=(document.getElementById('invQuickRemark').value||'').trim();
+    const res=document.getElementById('invQuickResult');
+    if(!who){ res.innerHTML=`<div style="padding:10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; color:#b91c1c;">❌ 請輸入領料人員，未填不可扣帳</div>`; document.getElementById('invQuickWho').focus(); return; }
+    if(!invStaff.some(s=>s.name.toLowerCase()===who.toLowerCase())){ res.innerHTML=`<div style="padding:10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; color:#b91c1c;">❌ 「${who||'（空白）'}」非建檔領料人員，不可扣帳，請至後台人員資料建檔或下拉選取</div>`; return; }
+    if(!qty||qty<=0){ res.innerHTML=`<div style="padding:10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; color:#b91c1c;">❌ 請輸入正確數量</div>`; return; }
+    const f=findInvItem(key);
+    if(f.err){ res.innerHTML=`<div style="padding:10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; color:#b91c1c;">❌ ${f.err}</div>`; return; }
+    const it=f.it;
+    if(it.stock<qty){
+        res.innerHTML=`<div style="padding:10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; color:#b91c1c;">❌ 庫存不足：${it.code} 現有 <b>${it.stock}</b>，無法扣 ${qty}（已阻擋負庫存）</div>`;
+        return;
+    }
+    it.stock-=qty;
+    it.updated=Date.now();
+    const no=genDocNo('OUT');
+    invLogs.unshift({no, t:Date.now(), type:'扣帳', code:it.code, who, qty:'-'+qty, balance:it.stock, remark:remark||'簡易扣帳'});
+    saveInv(); renderInvQuick();
+    res.innerHTML=`<div style="padding:12px; background:#f0fdf4; border:1px solid #6ee7b7; border-radius:8px; color:#065f46;">✔ 扣帳成功 <b>${no}</b><br>${it.code}${it.name?`（${it.name}）`:''} ${it.spec||''} －${qty}，領料人員 <b>${who}</b>，結餘 <b>${it.stock}</b> ${it.unit||''}</div>`;
+    document.getElementById('invQuickCode').value='';
+    document.getElementById('invQuickRemark').value='';
+    document.getElementById('invQuickQty').value='';
+    setTimeout(()=>{ const el=document.getElementById('invQuickCode'); if(el) el.focus(); }, 50);
+}
+function renderInvQuick(){
+    const d=new Date();
+    const ymd=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+    const today=invLogs.filter(l=>l.type==='扣帳' && new Date(l.t).toDateString()===d.toDateString());
+    let n=0;
+    today.forEach(l=>{ n+=-parseFloat(l.qty)||0; });
+    const sum=document.getElementById('invQuickSummary');
+    if(sum) sum.textContent=`今日（${ymd}）扣帳 ${today.length} 筆，共 ${n} 個`;
+    const tb=document.querySelector('#invQuickTable tbody');
+    if(!tb) return;
+    tb.innerHTML='';
+    today.slice(0,30).forEach(l=>{
+        const it=invItems.find(s=>s.code===l.code);
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td style="font-size:11px;">${formatCreatedAt(l.t)}</td><td><b>${l.code}</b></td><td>${it&&it.name?it.name:'—'}</td><td><b>${l.who||'—'}</b></td><td><b>${l.qty}</b></td><td>${l.balance}</td>`;
+        tb.appendChild(tr);
+    });
+    if(today.length===0) tb.innerHTML='<tr><td colspan="6" style="color:#94a3b8;">今日尚無扣帳，刷條碼即開始</td></tr>';
+}
 // ====== 計算邏輯 ======
 function findBoxSpec(code){
     code=(code||'').trim();
