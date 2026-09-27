@@ -123,7 +123,7 @@
         .hint { font-size:12px; color:#64748b; margin-top:4px; }
         .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; overflow-y: auto; padding: 20px; }
         .admin-overlay.show { display: block; }
-        .admin-panel { max-width: 750px; margin: 20px auto; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .admin-panel { max-width: 1000px; margin: 20px auto; background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .admin-panel h3 { margin: 0 0 12px; color:#1e293b; border-bottom:2px solid #e2e8f0; padding-bottom:8px; }
         .admin-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
         .close-btn { width:auto; padding:6px 12px; font-size:13px; background:#ef4444; margin:0; }
@@ -334,7 +334,7 @@
     </div>
     <div style="display:flex; gap:10px; margin-top:18px; flex-wrap:wrap;">
         <span style="flex:1 1 0; min-width:200px; position:relative; display:block; margin:0; box-sizing:border-box;">
-            <button class="io-btn" style="background:#0ea5e9;" onclick="exportAllDataAuth()">▼ 匯出全部資料</button>
+            <button class="io-btn" style="background:#0ea5e9;" onclick="exportAllDataAuth()">⭳匯出全部資料</button>
         </span>
         <span id="importWrap" style="flex:1 1 0; min-width:200px; position:relative; display:block; margin:0; box-sizing:border-box;" onclick="importGate(event)">
             <button class="io-btn" style="background:#8b5cf6;" tabindex="-1"><span id="importLabelText">⭱ 匯入全部資料</span></button>
@@ -558,26 +558,30 @@
     <div class="section" id="adminBoxSection">
         <h3>📦 紙箱規格管理</h3>
         <table class="spec-table" id="boxSpecTable">
-            <thead><tr><th class="sortable" onclick="sortBoxBy('code')">紙箱料號 <span id="sort-code"></span></th><th class="sortable" onclick="sortBoxBy('l')">長 <span id="sort-l"></span></th><th class="sortable" onclick="sortBoxBy('w')">寬 <span id="sort-w"></span></th><th class="sortable" onclick="sortBoxBy('h')">高 <span id="sort-h"></span></th><th class="sortable" onclick="sortBoxBy('size')">尺寸 <span id="sort-size"></span></th><th class="sortable" onclick="sortBoxBy('createdAt')">建立時間 <span id="sort-createdAt"></span></th><th>操作</th></tr></thead>
+            <thead><tr><th class="sortable" onclick="sortBoxBy('code')">料號 <span id="sort-code"></span></th><th class="sortable" onclick="sortBoxBy('name')">品名 <span id="sort-name"></span></th><th class="sortable" onclick="sortBoxBy('size')">規格 <span id="sort-size"></span></th><th class="sortable" onclick="sortBoxBy('l')">長 <span id="sort-l"></span></th><th class="sortable" onclick="sortBoxBy('w')">寬 <span id="sort-w"></span></th><th class="sortable" onclick="sortBoxBy('h')">高 <span id="sort-h"></span></th><th class="sortable" onclick="sortBoxBy('createdAt')">建立時間 <span id="sort-createdAt"></span></th><th>操作</th></tr></thead>
             <tbody></tbody>
         </table>
         <div class="add-row">
-            <div class="form-group"><label>紙箱料號</label><input type="text" id="newBoxCode" placeholder=""></div>
+            <div class="form-group"><label>料號</label><input type="text" id="newBoxCode" placeholder=""></div>
+            <div class="form-group"><label>品名</label><input type="text" id="newBoxName" placeholder=""></div>
+            <div class="form-group"><label>規格</label><input type="text" id="newBoxSpec" placeholder="" oninput="parseNewBoxSpec()"></div>
             <div class="form-group"><label>長</label><input type="number" id="newBoxL" placeholder=""></div>
             <div class="form-group"><label>寬</label><input type="number" id="newBoxW" placeholder=""></div>
             <div class="form-group"><label>高</label><input type="number" id="newBoxH" placeholder=""></div>
             <button class="btn-add" onclick="addBoxSpec()">＋ 新增紙箱</button>
         </div>
-        <div class="hint">建議紙箱料號如 14A / 15A，尺寸單位 cm，新增後前台自動可用</div>
+        <div class="hint">建議料號如 14A / 15A，尺寸單位 cm，新增後前台自動可用</div>
     </div>
     <div class="section" id="adminPalletSection" style="display:none;">
         <h3>🪵 棧板規格管理</h3>
         <table class="spec-table" id="palletSpecTable">
-            <thead><tr><th class="sortable" onclick="sortPalletBy('name')">名稱 <span id="sort-p-name"></span></th><th class="sortable" onclick="sortPalletBy('l')">長 <span id="sort-p-l"></span></th><th class="sortable" onclick="sortPalletBy('w')">寬 <span id="sort-p-w"></span></th><th class="sortable" onclick="sortPalletBy('h')">高 <span id="sort-p-h"></span></th><th class="sortable" onclick="sortPalletBy('size')">尺寸 <span id="sort-p-size"></span></th><th class="sortable" onclick="sortPalletBy('material')">材質 <span id="sort-p-material"></span></th><th class="sortable" onclick="sortPalletBy('createdAt')">建立時間 <span id="sort-p-createdAt"></span></th><th>操作</th></tr></thead>
+            <thead><tr><th class="sortable" onclick="sortPalletBy('code')">料號 <span id="sort-p-code"></span></th><th class="sortable" onclick="sortPalletBy('name')">品名 <span id="sort-p-name"></span></th><th class="sortable" onclick="sortPalletBy('size')">規格 <span id="sort-p-size"></span></th><th class="sortable" onclick="sortPalletBy('l')">長 <span id="sort-p-l"></span></th><th class="sortable" onclick="sortPalletBy('w')">寬 <span id="sort-p-w"></span></th><th class="sortable" onclick="sortPalletBy('h')">高 <span id="sort-p-h"></span></th><th class="sortable" onclick="sortPalletBy('material')">材質 <span id="sort-p-material"></span></th><th class="sortable" onclick="sortPalletBy('createdAt')">建立時間 <span id="sort-p-createdAt"></span></th><th>操作</th></tr></thead>
             <tbody></tbody>
         </table>
         <div class="add-row">
-            <div class="form-group"><label>名稱(選填)</label><input type="text" id="newPalletName" placeholder=""></div>
+            <div class="form-group"><label>料號</label><input type="text" id="newPalletCode" placeholder=""></div>
+            <div class="form-group"><label>品名</label><input type="text" id="newPalletName" placeholder=""></div>
+            <div class="form-group"><label>規格</label><input type="text" id="newPalletSpec" placeholder="" oninput="parseNewPalletSpec()"></div>
             <div class="form-group"><label>長</label><input type="number" id="newPalletL" placeholder=""></div>
             <div class="form-group"><label>寬</label><input type="number" id="newPalletW" placeholder=""></div>
             <div class="form-group"><label>高</label><input type="number" id="newPalletH" placeholder=""></div>
@@ -599,9 +603,9 @@
 <script>
 // ====== 預設規格 ======
 const DEFAULT_BOX_SPECS = [
-    {code:"14A", l:32, w:27, h:34},
-    {code:"15A", l:32, w:27, h:36},
-    {code:"17A", l:36, w:32, h:44},
+    {code:"14A", name:"14A紙箱", l:32, w:27, h:34},
+    {code:"15A", name:"15A紙箱", l:32, w:27, h:36},
+    {code:"17A", name:"17A紙箱", l:36, w:32, h:44},
 ];
 const DEFAULT_PALLET_SPECS = [
     {name:"76*56*15", l:76, w:56, h:15, material:"煙燻木棧板"},
@@ -643,7 +647,7 @@ function renderBoxSpecUI(){
         dl.innerHTML='';
         boxSpecs.forEach(s=>{
             const o=document.createElement('option');
-            o.value=s.code;
+            o.value=s.name||s.code;
             o.label=`${s.l}*${s.w}*${s.h}`;
             dl.appendChild(o);
         });
@@ -755,7 +759,7 @@ function addGroup(rangeStr, code){
         const nextStart = maxNum ? maxNum+1 : 1;
         const nextEnd = nextStart + count - 1;
         const nextRange = `${nextStart}-${nextEnd}`;
-        const defaultCode = boxSpecs[0]?.code || '14A';
+        const defaultCode = boxSpecs[0]?.name || boxSpecs[0]?.code || '14A';
         groups.push(createGroup(nextRange, defaultCode));
     }else{
         if(rangeStr===undefined) rangeStr='';
@@ -782,7 +786,7 @@ function renderGroups(){
     groups.forEach((g, idx)=>{
         const card = document.createElement('div');
         card.className='group-card';
-        const spec = boxSpecs.find(s=>s.code.toLowerCase()===(g.code||'').toLowerCase());
+        const spec = findBoxSpec(g.code);
         const dims = spec ? `${spec.l}*${spec.w}*${spec.h}` : (g.l && g.w && g.h ? `${g.l}*${g.w}*${g.h} (自訂)` : '—');
         const isCustom = !spec && g.code;
         card.innerHTML = `
@@ -835,7 +839,7 @@ function handleGroupCodeInput(idx){
     if(!el) return;
     groups[idx].code = el.value.trim();
     // 若找到規格，自動帶入尺寸並清除自訂
-    const spec = boxSpecs.find(s=>s.code.toLowerCase()===groups[idx].code.toLowerCase());
+    const spec = findBoxSpec(groups[idx].code);
     if(spec){
         groups[idx].l = spec.l; groups[idx].w = spec.w; groups[idx].h = spec.h;
     }
@@ -862,7 +866,7 @@ function updateGroupHint(idx){
     }
     const lst = parseBoxInput(g.range);
     const boxCount = lst ? lst.length : 0;
-    const spec = boxSpecs.find(s=>s.code.toLowerCase()===(g.code||'').toLowerCase());
+    const spec = findBoxSpec(g.code);
     if(!g.range){
         hintEl.textContent='請輸入箱號，例如 1-44';
         hintEl.style.color='#ef4444';
@@ -888,13 +892,14 @@ function updateGroupHint(idx){
         }
         return;
     }
-    hintEl.textContent=`✓ ${spec.code} ${spec.l}*${spec.w}*${spec.h} ／ ${boxCount} 箱 (${formatBoxRange(lst)})`;
+    hintEl.textContent=`✓ ${spec.code}${spec.name?`(${spec.name})`:''} ${spec.l}*${spec.w}*${spec.h} ／ ${boxCount} 箱 (${formatBoxRange(lst)})`;
     hintEl.style.color='#059669';
 }
 
 let boxSortKey='code', boxSortDir=1;
 function boxSortVal(s,key){
     if(key==='code') return String(s.code);
+    if(key==='name') return String(s.name||'');
     if(key==='l') return Number(s.l)||0;
     if(key==='w') return Number(s.w)||0;
     if(key==='h') return Number(s.h)||0;
@@ -907,7 +912,7 @@ function applyBoxSort(){
     boxSpecs.sort((a,b)=>{
         const va=boxSortVal(a,key), vb=boxSortVal(b,key);
         let r;
-        if(key==='code') r=String(va).localeCompare(String(vb), 'zh-Hant', {numeric:true});
+        if(key==='code' || key==='name') r=String(va).localeCompare(String(vb), 'zh-Hant', {numeric:true});
         else r=(va>vb?1:va<vb?-1:0) || String(a.code).localeCompare(String(b.code), 'zh-Hant', {numeric:true});
         return r*dir;
     });
@@ -923,13 +928,14 @@ function sortBoxBy(key){
     renderGroups();
 }
 function updateBoxSortHeaders(){
-    ['code','l','w','h','size','createdAt'].forEach(k=>{
+    ['code','name','l','w','h','size','createdAt'].forEach(k=>{
         const el=document.getElementById('sort-'+k);
         if(el) el.textContent = (boxSortKey===k) ? (boxSortDir===1 ? '▲' : '▼') : '';
     });
 }
 let palletSortKey='l', palletSortDir=1;
 function palletSortVal(s,key){
+    if(key==='code') return String(s.code||'');
     if(key==='name') return String(s.name||`${s.l}*${s.w}*${s.h}`);
     if(key==='l') return Number(s.l)||0;
     if(key==='w') return Number(s.w)||0;
@@ -944,7 +950,7 @@ function applyPalletSort(){
     palletSpecs.sort((a,b)=>{
         const va=palletSortVal(a,key), vb=palletSortVal(b,key);
         let r;
-        if(key==='name' || key==='material') r=String(va).localeCompare(String(vb), 'zh-Hant', {numeric:true});
+        if(key==='code' || key==='name' || key==='material') r=String(va).localeCompare(String(vb), 'zh-Hant', {numeric:true});
         else r=(va>vb?1:va<vb?-1:0) || (a.l-b.l) || (a.w-b.w) || (a.h-b.h);
         return r*dir;
     });
@@ -959,7 +965,7 @@ function sortPalletBy(key){
     renderAdminTables();
 }
 function updatePalletSortHeaders(){
-    ['name','l','w','h','size','material','createdAt'].forEach(k=>{
+    ['code','name','l','w','h','size','material','createdAt'].forEach(k=>{
         const el=document.getElementById('sort-p-'+k);
         if(el) el.textContent = (palletSortKey===k) ? (palletSortDir===1 ? '▲' : '▼') : '';
     });
@@ -975,49 +981,66 @@ function renderAdminTables(){
     tbody1.innerHTML='';
     boxSpecs.forEach((s,idx)=>{
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td><b>${s.code}</b></td><td>${s.l}</td><td>${s.w}</td><td>${s.h}</td><td>${s.l}*${s.w}*${s.h}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(s.createdAt)}</td><td><button class="mini-btn btn-edit" onclick="editBoxSpec(${idx})">修改</button> <button class="mini-btn btn-del" onclick="deleteBoxSpec(${idx})">刪除</button></td>`;
+        tr.innerHTML=`<td><b>${s.code}</b></td><td>${s.name||'—'}</td><td>${s.l}*${s.w}*${s.h}</td><td>${s.l}</td><td>${s.w}</td><td>${s.h}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(s.createdAt)}</td><td><button class="mini-btn btn-edit" onclick="editBoxSpec(${idx})">修改</button> <button class="mini-btn btn-del" onclick="deleteBoxSpec(${idx})">刪除</button></td>`;
         tbody1.appendChild(tr);
     });
-    if(boxSpecs.length===0) tbody1.innerHTML='<tr><td colspan="7" style="color:#94a3b8;">尚無資料</td></tr>';
+    if(boxSpecs.length===0) tbody1.innerHTML='<tr><td colspan="8" style="color:#94a3b8;">尚無資料</td></tr>';
     const tbody2=document.querySelector('#palletSpecTable tbody');
     tbody2.innerHTML='';
     palletSpecs.forEach((s,idx)=>{
         const name=s.name||`${s.l}*${s.w}*${s.h}`;
         const mat=s.material||'煙燻木棧板';
         const tr=document.createElement('tr');
-        tr.innerHTML=`<td><b>${name}</b></td><td>${s.l}</td><td>${s.w}</td><td>${s.h}</td><td>${s.l}*${s.w}*${s.h}</td><td>${mat}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(s.createdAt)}</td><td><button class="mini-btn btn-edit" onclick="editPalletSpec(${idx})">修改</button> <button class="mini-btn btn-del" onclick="deletePalletSpec(${idx})">刪除</button></td>`;
+        tr.innerHTML=`<td><b>${s.code||'—'}</b></td><td><b>${name}</b></td><td>${s.l}*${s.w}*${s.h}</td><td>${s.l}</td><td>${s.w}</td><td>${s.h}</td><td>${mat}</td><td style="font-size:11px; white-space:nowrap;">${formatCreatedAt(s.createdAt)}</td><td><button class="mini-btn btn-edit" onclick="editPalletSpec(${idx})">修改</button> <button class="mini-btn btn-del" onclick="deletePalletSpec(${idx})">刪除</button></td>`;
         tbody2.appendChild(tr);
     });
-    if(palletSpecs.length===0) tbody2.innerHTML='<tr><td colspan="8" style="color:#94a3b8;">尚無資料</td></tr>';
+    if(palletSpecs.length===0) tbody2.innerHTML='<tr><td colspan="9" style="color:#94a3b8;">尚無資料</td></tr>';
+}
+function parseNewBoxSpec(){
+    const v=(document.getElementById('newBoxSpec').value||'').trim().replace(/×/g,'*').replace(/x/gi,'*');
+    const m=v.match(/^(\d+(?:\.\d+)?)\*(\d+(?:\.\d+)?)\*(\d+(?:\.\d+)?)$/);
+    if(!m) return;
+    document.getElementById('newBoxL').value=m[1];
+    document.getElementById('newBoxW').value=m[2];
+    document.getElementById('newBoxH').value=m[3];
 }
 function addBoxSpec(){
     const code=document.getElementById('newBoxCode').value.trim();
+    const name=document.getElementById('newBoxName').value.trim()||code;
     const l=parseFloat(document.getElementById('newBoxL').value);
     const w=parseFloat(document.getElementById('newBoxW').value);
     const h=parseFloat(document.getElementById('newBoxH').value);
-    if(!code){ alert('請輸入紙箱料號，例如 14A'); return; }
+    if(!code){ alert('請輸入料號，例如 14A'); return; }
     if(!l||!w||!h){ alert('請完整輸入長寬高'); return; }
-    if(boxSpecs.some(s=>s.code.toLowerCase()===code.toLowerCase())){ alert('紙箱料號已存在：'+code); return; }
-    boxSpecs.push({code,l,w,h,createdAt:Date.now()});
+    if(boxSpecs.some(s=>s.code.toLowerCase()===code.toLowerCase())){ alert('料號已存在：'+code); return; }
+    boxSpecs.push({code,name,l,w,h,createdAt:Date.now()});
     applyBoxSort();
     saveBoxSpecs();
     renderBoxSpecUI();
     renderAdminTables();
     renderGroups();
     document.getElementById('newBoxCode').value='';
+    document.getElementById('newBoxName').value='';
+    document.getElementById('newBoxSpec').value='';
     document.getElementById('newBoxL').value='';
     document.getElementById('newBoxW').value='';
     document.getElementById('newBoxH').value='';
 }
 function editBoxSpec(idx){
     const s=boxSpecs[idx];
-    let code,l,w,h;
+    let code,name,l,w,h;
     while(true){
-        const inp = prompt('修改 紙箱料號', s.code);
+        const inp = prompt('修改 料號', s.code);
         if(inp===null) return;
         code=inp.trim();
         if(!code){ alert('料號不可空白'); continue; }
-        if(code.toLowerCase()!==s.code.toLowerCase() && boxSpecs.some((o,i)=> i!==idx && o.code.toLowerCase()===code.toLowerCase())){ alert('紙箱料號已存在：'+code); continue; }
+        if(code.toLowerCase()!==s.code.toLowerCase() && boxSpecs.some((o,i)=> i!==idx && o.code.toLowerCase()===code.toLowerCase())){ alert('料號已存在：'+code); continue; }
+        break;
+    }
+    while(true){
+        const inp = prompt('修改 品名', s.name||'');
+        if(inp===null) return;
+        name=inp.trim()||code;
         break;
     }
     while(true){
@@ -1041,7 +1064,7 @@ function editBoxSpec(idx){
         if(!h||h<=0){ alert('高度輸入錯誤'); continue; }
         break;
     }
-    boxSpecs[idx]={code,l,w,h,createdAt:s.createdAt||Date.now()};
+    boxSpecs[idx]={code,name,l,w,h,createdAt:s.createdAt||Date.now()};
     applyBoxSort();
     saveBoxSpecs();
     renderBoxSpecUI();
@@ -1056,26 +1079,33 @@ function deleteBoxSpec(idx){
     renderAdminTables();
     renderGroups();
 }
+function parseNewPalletSpec(){
+    const v=(document.getElementById('newPalletSpec').value||'').trim().replace(/×/g,'*').replace(/x/gi,'*');
+    const m=v.match(/^(\d+(?:\.\d+)?)\*(\d+(?:\.\d+)?)\*(\d+(?:\.\d+)?)$/);
+    if(!m) return;
+    document.getElementById('newPalletL').value=m[1];
+    document.getElementById('newPalletW').value=m[2];
+    document.getElementById('newPalletH').value=m[3];
+}
 function addPalletSpec(){
+    const code=document.getElementById('newPalletCode').value.trim();
     let name=document.getElementById('newPalletName').value.trim();
     const l=parseFloat(document.getElementById('newPalletL').value);
     const w=parseFloat(document.getElementById('newPalletW').value);
     const h=parseFloat(document.getElementById('newPalletH').value);
     const material=(document.getElementById('newPalletMaterial')?.value || '').trim() || '煙燻木棧板';
     if(!l||!w||!h){ alert('請完整輸入長寬高'); return; }
+    if(code && palletSpecs.some(s=> (s.code||'').toLowerCase()===code.toLowerCase())){ alert('料號已存在：'+code); return; }
     if(!name) name=`${l}*${w}*${h}`;
-    // 允許同名「棧板」顯示，但以尺寸作唯一值
-    if(name==="棧板"){
-        if(palletSpecs.some(s=> s.l===l && s.w===w && s.h===h)){ alert('相同尺寸的棧板已存在：'+`${l}*${w}*${h}`); return; }
-    } else {
-        if(palletSpecs.some(s=> (s.name||`${s.l}*${s.w}*${s.h}`).toLowerCase()===name.toLowerCase())){ alert('名稱已存在：'+name); return; }
-    }
-    palletSpecs.push({name,l,w,h,material,createdAt:Date.now()});
+    // 品名允許重複，僅料號需唯一
+    palletSpecs.push({code,name,l,w,h,material,createdAt:Date.now()});
     applyPalletSort();
     savePalletSpecs();
     renderPalletSpecSelect();
     renderAdminTables();
+    document.getElementById('newPalletCode').value='';
     document.getElementById('newPalletName').value='';
+    document.getElementById('newPalletSpec').value='';
     document.getElementById('newPalletL').value='';
     document.getElementById('newPalletW').value='';
     document.getElementById('newPalletH').value='';
@@ -1086,13 +1116,19 @@ function addPalletSpec(){
 function editPalletSpec(idx){
     const s=palletSpecs[idx];
     const curName=s.name||`${s.l}*${s.w}*${s.h}`;
-    let name, l, w, h, material;
+    let code, name, l, w, h, material;
     while(true){
-        const inp = prompt('修改 名稱', s.name||'');
+        const inp = prompt('修改 料號 (可空白)', s.code||'');
+        if(inp===null) return;
+        code=inp.trim();
+        if(code && palletSpecs.some((o,i)=> i!==idx && (o.code||'').toLowerCase()===code.toLowerCase())){ alert('料號已存在：'+code); continue; }
+        break;
+    }
+    while(true){
+        const inp = prompt('修改 品名 (可重複)', s.name||'');
         if(inp===null) return;
         name=inp.trim();
-        if(!name){ alert('名稱不可空白，請輸入名稱'); continue; }
-        if(name!=="棧板" && name.toLowerCase()!==curName.toLowerCase() && palletSpecs.some((o,i)=> i!==idx && (o.name||`${o.l}*${o.w}*${o.h}`).toLowerCase()===name.toLowerCase())){ alert('名稱已存在：'+name); continue; }
+        if(!name){ alert('品名不可空白，請輸入品名'); continue; }
         break;
     }
     while(true){
@@ -1122,8 +1158,7 @@ function editPalletSpec(idx){
         material=inp.trim()||'煙燻木棧板';
         break;
     }
-    if(name==="棧板" && palletSpecs.some((o,i)=> i!==idx && o.l===l && o.w===w && o.h===h)){ alert('相同尺寸的棧板已存在：'+`${l}*${w}*${h}`); return; }
-    palletSpecs[idx]={name,l,w,h,material,createdAt:s.createdAt||Date.now()};
+    palletSpecs[idx]={code,name,l,w,h,material,createdAt:s.createdAt||Date.now()};
     applyPalletSort();
     savePalletSpecs();
     renderPalletSpecSelect();
@@ -1514,7 +1549,7 @@ function importBoxToInv(){
     let n=0;
     boxSpecs.forEach(s=>{
         if(!invItems.some(o=>o.code.toLowerCase()===s.code.toLowerCase())){
-            invItems.push({code:s.code, name:s.code+'紙箱', spec:`${s.l}*${s.w}*${s.h}`, loc:'', stock:0, safe:0, unit:'個', updated:Date.now()});
+            invItems.push({code:s.code, name:s.name||s.code+'紙箱', spec:`${s.l}*${s.w}*${s.h}`, loc:'', stock:0, safe:0, unit:'個', updated:Date.now()});
             n++;
         }
     });
@@ -1833,6 +1868,21 @@ renderInv();
 renderInvOutSelect();
 renderInvLog();
 // ====== 計算邏輯 ======
+function findBoxSpec(code){
+    code=(code||'').trim();
+    if(!code) return null;
+    const low=code.toLowerCase();
+    const exact=boxSpecs.find(s=>s.code.toLowerCase()===low);
+    if(exact) return exact;
+    // 品名精確比對：直接輸入品名也能抓到
+    const byName=boxSpecs.find(s=>(s.name||'').toLowerCase()===low);
+    if(byName) return byName;
+    // 模糊比對：料號含 14A 結尾如 MCB0200014A 也能抓到 14A（取最長相符）
+    const cands=boxSpecs.filter(s=>{ const c=s.code.toLowerCase(); return c && (low.includes(c)||c.includes(low)); });
+    if(!cands.length) return null;
+    cands.sort((a,b)=>b.code.length-a.code.length);
+    return cands[0];
+}
 function parseBoxInput(input) {
     let s = (input || '').trim();
     if (!s) return null;
@@ -1986,7 +2036,7 @@ function calculatePallet() {
             }
             allBoxNumbers.add(n);
         }
-        const spec = boxSpecs.find(s=>s.code.toLowerCase()===g.code.toLowerCase());
+        const spec = findBoxSpec(g.code);
         let boxL, boxW, boxH;
         if(spec){ boxL=spec.l; boxW=spec.w; boxH=spec.h; }
         else {
@@ -2058,7 +2108,7 @@ function calculatePallet() {
             const info = best.perGroupInfos[idx];
             const groupVol = (g.boxList.length * g.boxL * g.boxW * g.boxH / 1e6).toFixed(3);
             const layerFill = (info.perLayer * info.baseA * info.baseB / (best.pallet.l * best.pallet.w) * 100).toFixed(1);
-            output += `組別 #${g.idx+1} ${g.code} ${g.boxL}*${g.boxW}*${g.boxH}：${info.orientation}，${info.perLayer}箱/層 x ${info.layers}層 = ${info.maxBoxesPerPallet}箱/板 ／ 單層貼合 ${layerFill}% ／ 材積 ${groupVol} CBM\n`;
+            output += `組別 #${g.idx+1} ${g.code}${g.spec&&g.spec.name&&g.spec.name!==g.code?`(${g.spec.name})`:''} ${g.boxL}*${g.boxW}*${g.boxH}：${info.orientation}，${info.perLayer}箱/層 x ${info.layers}層 = ${info.maxBoxesPerPallet}箱/板 ／ 單層貼合 ${layerFill}% ／ 材積 ${groupVol} CBM\n`;
         });
         output += `----------------------------------------\n`;
         let globalPalletCounter=1;
@@ -2072,7 +2122,7 @@ function calculatePallet() {
                 const actualTotalH=best.pallet.h + (actualLayers*useH);
                 const rangeStr=formatBoxRange(slice);
                 const palletVol = (best.pallet.l*best.pallet.w*actualTotalH/1e6).toFixed(3);
-                output += `<b>▶️ PLT${globalPalletCounter}:</b> ${rangeStr} 箱 (${g.code}) | 尺寸: ${best.pallet.l} x ${best.pallet.w} x <b>${actualTotalH}</b> cm (材積 ${palletVol} CBM)\n`;
+                output += `<b>▶️ PLT${globalPalletCounter}:</b> ${rangeStr} 箱 (${(g.spec&&g.spec.name)?g.spec.name:g.code}) | 尺寸: ${best.pallet.l} x ${best.pallet.w} x <b>${actualTotalH}</b> cm (材積 ${palletVol} CBM)\n`;
                 globalPalletCounter++;
             }
         }
@@ -2081,7 +2131,7 @@ function calculatePallet() {
         candidates.forEach((c,idx)=>{
             const mark = idx===0 ? '⭐' : '  ';
             const p=c.pallet;
-            const displayName = p.name==="棧板" ? `棧板 ${p.l}*${p.w}*${p.h}` : (p.name||`${p.l}*${p.w}*${p.h}`);
+            const displayName = `${p.name||'棧板'} ${p.l}*${p.w}*${p.h}`;
             output += `${mark} ${displayName}：共需 ${c.totalPallets} 板，總高 ${c.totalActualHeight}cm，貼合 ${c.avgLayerFill.toFixed(1)}%，利用率 ${c.utilization.toFixed(1)}%\n`;
         });
         resultDiv.innerHTML = output;
@@ -2128,7 +2178,7 @@ function calculatePallet() {
     parsedGroups.forEach((g, idx)=>{
         const r = perGroupRs[idx];
         const groupVol = (g.boxList.length * g.boxL * g.boxW * g.boxH / 1e6).toFixed(3);
-        output += `組別 #${g.idx+1} ${g.code} ${g.boxL}*${g.boxW}*${g.boxH}：${r.orientation}，${r.perLayer}箱/層 x ${r.layers}層 = ${r.maxBoxesPerPallet}箱/板 ／ 材積 ${groupVol} CBM\n`;
+        output += `組別 #${g.idx+1} ${g.code}${g.spec&&g.spec.name&&g.spec.name!==g.code?`(${g.spec.name})`:''} ${g.boxL}*${g.boxW}*${g.boxH}：${r.orientation}，${r.perLayer}箱/層 x ${r.layers}層 = ${r.maxBoxesPerPallet}箱/板 ／ 材積 ${groupVol} CBM\n`;
     });
     output += `----------------------------------------\n`;
     let globalPalletCounter=1;
@@ -2142,7 +2192,7 @@ function calculatePallet() {
             const actualTotalH=palletWeightH + (actualLayers*useH);
             const rangeStr=formatBoxRange(slice);
             const palletVol = (palletL*palletW*actualTotalH/1e6).toFixed(3);
-            output += `<b>▶️ PLT${globalPalletCounter}:</b> ${rangeStr} 箱 (${g.code}) | 尺寸: ${palletL} x ${palletW} x <b>${actualTotalH}</b> cm (材積 ${palletVol} CBM)\n`;
+            output += `<b>▶️ PLT${globalPalletCounter}:</b> ${rangeStr} 箱 (${(g.spec&&g.spec.name)?g.spec.name:g.code}) | 尺寸: ${palletL} x ${palletW} x <b>${actualTotalH}</b> cm (材積 ${palletVol} CBM)\n`;
             globalPalletCounter++;
         }
     }
