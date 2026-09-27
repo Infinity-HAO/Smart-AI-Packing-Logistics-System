@@ -50,7 +50,7 @@
         body.dark-mode .spec-table tbody tr:hover td { background:#1e3a5f !important; color:#fff !important; }
         body.dark-mode .tech-status { background:linear-gradient(90deg, rgba(6,182,214,0.14), rgba(37,99,235,0.1)) !important; border-color:rgba(56,189,248,0.3) !important; color:#7dd3fc !important; }
         body.dark-mode .theme-toggle { background:#e2e8f0; color:#0f172a; border-color:#e2e8f0; }
-        #valvePage, #palletPage, #selectPage, #containerPage, #boxInBoxPage { max-width: 1020px; }
+        #valvePage, #palletPage, #selectPage, #containerPage, #boxInBoxPage { max-width: 1020px; margin:0 auto; box-sizing:border-box; }
         .container {
             max-width: 700px;
             margin: 0 auto;
@@ -77,10 +77,18 @@
             border:1px solid rgba(6,182,214,0.22); border-radius:8px;
             padding:7px 12px; margin-bottom:14px; position:relative; overflow:hidden;
         }
+        .tech-status .sep { opacity:.4; }
         .tech-status::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(to bottom,#06b6d4,#2563eb); }
         .tech-status .dot { width:7px; height:7px; border-radius:50%; background:#22c55e; box-shadow:0 0 8px #22c55e; animation:pulseDot 2s ease-in-out infinite; flex-shrink:0; }
-        .tech-status .sep { opacity:.4; }
         .tech-status small { margin-left:auto; color:#64748b; font-size:10px; letter-spacing:.5px; }
+
+        .typewrite::after { content:'_'; animation:blink 1s step-end infinite; margin-left:2px; }
+        .typewrite.done::after { display:none; }
+        .tech-status::after { content:''; position:absolute; top:0; bottom:0; left:-25%; width:22%; background:linear-gradient(105deg,transparent,rgba(56,189,248,0.22),transparent); transform:skewX(-18deg); animation:barSweep 8s ease-in-out infinite; pointer-events:none; }
+        @keyframes barSweep { 0%{left:-25%;} 65%,100%{left:125%;} }
+
+
+
         @keyframes pulseDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(.8);opacity:.65} }
         .corner-bracket { position:absolute; width:14px; height:14px; pointer-events:none; opacity:.55; }
         .corner-tl { top:10px; left:10px; border-top:2px solid rgba(37,99,235,.4); border-left:2px solid rgba(37,99,235,.4); border-radius:6px 0 0 0; }
@@ -159,7 +167,7 @@
         .btn-group-secondary { background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; }
         .btn-group-secondary:hover { background:#cbd5e1 !important; color:#1e293b !important; }
         .btn-clear:hover { background:#dc2626 !important; }
-        .io-btn{flex:1 1 0 !important; min-width:140px !important; margin:0 !important; box-sizing:border-box !important; display:block !important; width:100% !important; padding:12px !important; font-size:16px !important; font-weight:bold !important; line-height:1.7 !important; white-space:nowrap !important; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Segoe UI Symbol','Noto Sans Symbols 2',Helvetica,Arial,sans-serif !important; border:none !important; border-radius:6px !important; color:#fff !important; text-align:center !important; cursor:pointer;}
+        .io-btn{flex:1 1 0 !important; min-width:140px !important; margin:0 !important; box-sizing:border-box !important; display:block !important; width:100% !important; padding:8px !important; font-size:16px !important; font-weight:bold !important; line-height:1.5 !important; white-space:nowrap !important; overflow:hidden; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Segoe UI Symbol','Noto Sans Symbols 2',Helvetica,Arial,sans-serif !important; border:none !important; border-radius:6px !important; color:#fff !important; text-align:center !important; cursor:pointer;}
         #importLabelText{position:relative;}
         #importWrap:hover button{filter:brightness(1.12);}
         #importWrap:hover button::before{left:130%;}
@@ -221,7 +229,7 @@
         .pwd-actions { display:flex; gap:10px; margin-top:14px; }
         .pwd-actions button { flex:1; margin:0; padding:10px; }
         /* 選擇頁面 */
-        .select-page { max-width:700px; margin:20px auto; background:#fff; padding:30px; padding-top:32px; border-radius:14px; border:1px solid rgba(37,99,235,0.12); box-shadow:0 10px 30px rgba(15,23,42,0.08); text-align:center; display:none; position:relative; overflow:hidden; }
+        .select-page { max-width:700px; margin:0 auto; background:#fff; padding:25px; padding-top:28px; border-radius:14px; border:1px solid rgba(37,99,235,0.12); box-shadow:0 10px 30px rgba(15,23,42,0.08); text-align:center; display:none; position:relative; overflow:hidden; }
         .select-page::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:linear-gradient(90deg,#06b6d4,#2563eb 40%,#8b5cf6 70%,#06b6d4); background-size:200% 100%; animation:topBeam 6s linear infinite; }
         .select-page.show { display:block; }
         .select-grid { display:flex; gap:16px; margin-top:20px; flex-wrap:wrap; }
@@ -241,6 +249,7 @@
         .group-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(to bottom,#06b6d4,#2563eb); opacity:.7; }
         .result-box { border-left-width:5px; box-shadow:0 6px 18px rgba(15,23,42,0.06); }
         .table-scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -4px; padding:0 4px; }
+
         .table-scroll table { min-width:560px; }
         /* 手機版 RWD */
         @media(max-width:640px){
@@ -291,7 +300,7 @@
 
 <div id="selectPage" class="select-page">
     <div class="corner-bracket corner-tl"></div><div class="corner-bracket corner-tr"></div><div class="corner-bracket corner-bl"></div><div class="corner-bracket corner-br"></div>
-    <div class="tech-status"><span class="dot"></span> SELECT MODE <span class="sep">|</span> PACKLOGIX OPS <span class="sep">|</span> READY <small id="techClockSelect"></small></div>
+    <div class="tech-status"><span class="dot"></span><span class="typewrite" data-p="SYSTEM ONLINE | PACKLOGIX ENGINE | SECURE"></span><small id="techClockSelect"></small></div>
     <div style="position:relative; margin-bottom:10px;">
         <h2 style="color:#1e293b; margin:0; letter-spacing:1px; text-align:center;">請選擇功能</h2>
         <label class="tech-switch" title="深色 / 淺色切換" style="position:absolute; right:0; top:50%; transform:translateY(-50%);"><input type="checkbox" class="theme-checkbox" onchange="toggleTheme()"><span class="track"><span class="sun">☀</span><span class="moon">☾</span><span class="knob"></span></span></label>
@@ -340,11 +349,14 @@
         <div class="form-group"><label>貼上備份 JSON 全文（用記事本開啟備份檔→全選複製→貼上）</label><textarea id="pasteJson" rows="4" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box; font-size:12px; font-family:monospace;"></textarea></div>
         <button style="background:#8b5cf6;" onclick="importPastedData()">⭱ 匯入貼上內容</button>
     </div>
+    <div style="margin-top:16px; padding:10px 12px; background:#fffbeb; border:1px solid #fcd34d; border-radius:8px; font-size:12px; color:#92400e; line-height:1.7; text-align:left;">
+        ⚠️ 注意事項：若頁面資料、按鈕與最新版本不同步（疑似看到舊畫面），請按 <b>Ctrl+F5</b>（或 <b>Ctrl+Shift+R</b>）強制重整，繞過瀏覽器快取重讀檔案後再操作。
+    </div>
 </div>
 
 <div id="palletPage" class="container" style="display:none;">
     <div class="corner-bracket corner-tl"></div><div class="corner-bracket corner-tr"></div><div class="corner-bracket corner-bl"></div><div class="corner-bracket corner-br"></div>
-    <div class="tech-status"><span class="dot"></span> SYSTEM ONLINE <span class="sep">|</span> PACKLOGIX ENGINE <span class="sep">|</span> SECURE <small id="techClockPallet"></small></div>
+    <div class="tech-status"><span class="dot"></span><span class="typewrite" data-p="SYSTEM ONLINE | PACKLOGIX ENGINE | SECURE"></span><small id="techClockPallet"></small></div>
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 12px;">
         <button onclick="showSelect()" class="back-btn" style="width:auto; padding:6px 10px; font-size:12px; margin:0; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">← 返回選擇</button>
         <label class="tech-switch" title="深色 / 淺色切換"><input type="checkbox" class="theme-checkbox" onchange="toggleTheme()"><span class="track"><span class="sun">☀</span><span class="moon">☾</span><span class="knob"></span></span></label>
@@ -402,8 +414,9 @@
     <div id="result" class="result-box"></div>
 </div>
 
-<div id="containerPage" class="container" style="display:none; padding:40px 20px;">
-    <div class="tech-status"><span class="dot"></span> SYSTEM ONLINE <span class="sep">|</span> PACKLOGIX ENGINE <span class="sep">|</span> SECURE <small id="techClockContainer"></small></div>
+<div id="containerPage" class="container" style="display:none;">
+    <div class="corner-bracket corner-tl"></div><div class="corner-bracket corner-tr"></div><div class="corner-bracket corner-bl"></div><div class="corner-bracket corner-br"></div>
+    <div class="tech-status"><span class="dot"></span><span class="typewrite" data-p="SYSTEM ONLINE | PACKLOGIX ENGINE | SECURE"></span><small id="techClockContainer"></small></div>
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 16px;">
         <button onclick="showSelect()" class="back-btn" style="width:auto; padding:6px 10px; font-size:12px; margin:0; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">← 返回選擇</button>
         <label class="tech-switch" title="深色 / 淺色切換"><input type="checkbox" class="theme-checkbox" onchange="toggleTheme()"><span class="track"><span class="sun">☀</span><span class="moon">☾</span><span class="knob"></span></span></label>
@@ -416,8 +429,9 @@
     </div>
 </div>
 
-<div id="boxInBoxPage" class="container" style="display:none; padding:40px 20px;">
-    <div class="tech-status"><span class="dot"></span> SYSTEM ONLINE <span class="sep">|</span> PACKLOGIX ENGINE <span class="sep">|</span> SECURE <small id="techClockBoxInBox"></small></div>
+<div id="boxInBoxPage" class="container" style="display:none;">
+    <div class="corner-bracket corner-tl"></div><div class="corner-bracket corner-tr"></div><div class="corner-bracket corner-bl"></div><div class="corner-bracket corner-br"></div>
+    <div class="tech-status"><span class="dot"></span><span class="typewrite" data-p="SYSTEM ONLINE | PACKLOGIX ENGINE | SECURE"></span><small id="techClockBoxInBox"></small></div>
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 16px;">
         <button onclick="showSelect()" class="back-btn" style="width:auto; padding:6px 10px; font-size:12px; margin:0; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">← 返回選擇</button>
         <label class="tech-switch" title="深色 / 淺色切換"><input type="checkbox" class="theme-checkbox" onchange="toggleTheme()"><span class="track"><span class="sun">☀</span><span class="moon">☾</span><span class="knob"></span></span></label>
@@ -430,8 +444,9 @@
     </div>
 </div>
 
-<div id="valvePage" class="container" style="display:none; padding:40px 20px;">
-    <div class="tech-status"><span class="dot"></span> SYSTEM ONLINE <span class="sep">|</span> PACKLOGIX ENGINE <span class="sep">|</span> SECURE <small id="techClockValve"></small></div>
+<div id="valvePage" class="container" style="display:none;">
+    <div class="corner-bracket corner-tl"></div><div class="corner-bracket corner-tr"></div><div class="corner-bracket corner-bl"></div><div class="corner-bracket corner-br"></div>
+    <div class="tech-status"><span class="dot"></span><span class="typewrite" data-p="SYSTEM ONLINE | PACKLOGIX ENGINE | SECURE"></span><small id="techClockValve"></small></div>
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin:0 0 16px;">
         <button onclick="showSelect()" class="back-btn" style="width:auto; padding:6px 10px; font-size:12px; margin:0; background:#f1f5f9; color:#334155; border:1px solid #cbd5e1;">← 返回選擇</button>
         <label class="tech-switch" title="深色 / 淺色切換"><input type="checkbox" class="theme-checkbox" onchange="toggleTheme()"><span class="track"><span class="sun">☀</span><span class="moon">☾</span><span class="knob"></span></span></label>
@@ -1297,6 +1312,7 @@ function showSelect(){
     const sel=document.getElementById('selectPage');
     sel.style.display='block';
     setTimeout(()=> sel.classList.add('show'), 10);
+    window.scrollTo(0,0);
 }
 function showDevPage(id){
     document.getElementById('selectPage').style.display='none';
@@ -1347,6 +1363,20 @@ function updateTechClocks(){
 }
 setInterval(updateTechClocks, 1000);
 updateTechClocks();
+document.querySelectorAll('.typewrite').forEach(el=>{
+    const cur=((el.dataset.p||'').split('///')[0]||'');
+    if(!cur) return;
+    let ci=0;
+    const hold=Math.max(1000, 10000-cur.length*55);
+    (function tick(){
+        el.classList.remove('done');
+        el.textContent=cur.slice(0,ci++);
+        if(ci<=cur.length){ setTimeout(tick, 55); return; }
+        el.classList.add('done');
+        setTimeout(()=>{ ci=0; tick(); }, hold);
+    })();
+});
+
 (function(){
     const c=document.getElementById('splashMatrix');
     if(!c) return;
